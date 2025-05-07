@@ -3,14 +3,21 @@ import React, { ReactElement } from 'react';
 import { useDrawerStore } from '../../stores/drawer-store';
 import { MenuItemNames } from '../../types/menu-item-names';
 import { useNavigate } from 'react-router-dom';
+// import { useAccidentsQuery } from '../../services/accidents-service';
+import { useAllBikePointLocations } from '../../services/bike-point-service';
 
 export default function MenuComp() {
   const drawerStore = useDrawerStore();
   const navigate = useNavigate();
+  // const getAccidentsQuery = useAccidentsQuery(2010);
+  const getAllBikePointLocations = useAllBikePointLocations();
+  console.log(getAllBikePointLocations.data);
+
   const items = [
-    { id: 1, name: MenuItemNames.OpenLayers },
-    { id: 2, name: MenuItemNames.D3 },
-    { id: 3, name: MenuItemNames.AGgrid },
+    { id: 1, name: MenuItemNames.Test },
+    { id: 2, name: MenuItemNames.OpenLayers },
+    { id: 3, name: MenuItemNames.D3 },
+    { id: 4, name: MenuItemNames.AGgrid },
   ];
 
   const getNavItem = (name: string): ReactElement => {
@@ -21,6 +28,8 @@ export default function MenuComp() {
         return getD3NavItem();
       case MenuItemNames.AGgrid:
         return getAgGridNavItem();
+      case MenuItemNames.Test:
+        return getTestItem();
       default:
         return getUnknownNavItem();
     }
@@ -58,6 +67,17 @@ export default function MenuComp() {
       </Box>
     );
   };
+
+  const getTestItem = () => {
+    return (
+      <Box
+        sx={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }}
+        onClick={() => testFn()}
+      ></Box>
+    );
+  };
+
+  const testFn = () => {};
 
   return (
     <List sx={{ ml: 1 }}>
