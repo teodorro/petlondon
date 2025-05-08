@@ -1,34 +1,44 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import 'ol/ol.css';
 import { Map, View } from 'ol';
 import { fromLonLat } from 'ol/proj';
-import TileLayer from 'ol/layer/Tile';
 import { Layer } from 'ol/layer';
-import OSM from 'ol/source/OSM';
 import { useThemeStore } from '../../stores/theme-store';
 import { Box } from '@mui/material';
+import { useAllBikePointLocations } from '../../services/bike-point-service';
+import { createSelectors } from '../../utils/create-selectors';
+import { useBikeStore } from '../../stores/bike-store';
+import { getTileLayer } from './get-tile-layer';
+import { loadBikesToSchema } from './load-objects-to-schema';
+import { getBikeLayer } from './get-bike-layer';
 
 export default function MapComp() {
-  const themeStore = useThemeStore();
+  const tileLayer = useRef<Layer>(null);
+  const bikeLayer = useRef<Layer>(null);
+
+  const themeStoreSelectors = createSelectors(useThemeStore);
+  const themeMode = themeStoreSelectors.use.mode();
+  const bikeStoreSelectors = createSelectors(useBikeStore);
+  const setBikePoints = bikeStoreSelectors.use.setBikePoints();
+  const bikePoints = bikeStoreSelectors.use.bikePoints();
+
+  const getAllBikePointLocations = useAllBikePointLocations();
 
   useEffect(() => {
     const view = getView();
-    const map = getMap(view, [getTileLayer()]);
+    tileLayer.current = getTileLayer(themeMode);
+    bikeLayer.current = getBikeLayer();
+    loadBikesToSchema(bikeLayer.current, bikePoints);
+    const map = getMap(view, [tileLayer.current, bikeLayer.current]);
     return () => {
       map.setTarget(undefined);
     };
-  }, [themeStore.mode]);
-
-  const getTileLayer = (): TileLayer => {
-    const layer = new TileLayer({
-      source: new OSM(),
-    });
-    if (themeStore.mode === 'dark') {
-      layer.on('prerender', makeColorsDark);
-      layer.on('postrender', stopFilteringColors);
-    }
-    return layer;
-  };
+  }, [themeMode]);
+  useEffect(() => {
+    setBikePoints(getAllBikePointLocations.data);
+    if (bikeLayer.current != null)
+      loadBikesToSchema(bikeLayer.current, bikePoints);
+  }, [getAllBikePointLocations.data, bikePoints, setBikePoints]);
 
   return <Box id="map" sx={{ width: 1, height: 1 }}></Box>;
 }
@@ -47,19 +57,4 @@ const getMap = (view: View, layers: Layer[]): Map => {
     layers: layers,
     view,
   });
-};
-
-const makeColorsDark = (evt: { context: unknown }) => {
-  if (evt.context) {
-    const context = evt.context as CanvasRenderingContext2D;
-    context.filter = 'grayscale(80%) invert(100%) ';
-    context.globalCompositeOperation = 'source-over';
-  }
-};
-
-const stopFilteringColors = (evt: { context: unknown }) => {
-  if (evt.context) {
-    const context = evt.context as CanvasRenderingContext2D;
-    context.filter = 'none';
-  }
 };

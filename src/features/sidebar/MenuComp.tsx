@@ -4,14 +4,11 @@ import { useDrawerStore } from '../../stores/drawer-store';
 import { MenuItemNames } from '../../types/menu-item-names';
 import { useNavigate } from 'react-router-dom';
 // import { useAccidentsQuery } from '../../services/accidents-service';
-import { useAllBikePointLocations } from '../../services/bike-point-service';
 
 export default function MenuComp() {
   const drawerStore = useDrawerStore();
   const navigate = useNavigate();
   // const getAccidentsQuery = useAccidentsQuery(2010);
-  const getAllBikePointLocations = useAllBikePointLocations();
-  console.log(getAllBikePointLocations.data);
 
   const items = [
     { id: 1, name: MenuItemNames.Test },
