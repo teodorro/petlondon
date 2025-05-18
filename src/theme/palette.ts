@@ -3,6 +3,10 @@ export const lightPalette = {
   primary: { main: '#0019A8' },
   secondary: { main: '#1C2453' },
   background: { default: '#f9f9f9' },
+  text: {
+    primary: '#222',
+    secondary: '#555',
+  },
 };
 
 export const darkPalette = {
@@ -10,4 +14,8 @@ export const darkPalette = {
   primary: { main: '#0019A8' },
   secondary: { main: '#1C2453' },
   background: { default: '#121417' },
+  text: {
+    primary: '#ddd',
+    secondary: '#aaa',
+  },
 };

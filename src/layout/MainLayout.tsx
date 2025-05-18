@@ -12,7 +12,7 @@ export const MainLayout = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <AppHeader />
-      <Toolbar sx={{ border: '2px solid #0a0' }} />
+      <Toolbar sx={{ border: '2px solid #0a0', height: '64px' }} />
       <Box sx={{ display: 'flex', flex: 1, width: '100vw' }}>
         <Sidebar />
         <Box

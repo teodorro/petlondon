@@ -1,7 +1,18 @@
 import React from 'react';
+import ModeNumberLines from '../features/d3charts/ModeNumberLines';
+import { Box } from '@mui/material';
 
-type Props = {};
-
-export default function D3Page({}: Props) {
-  return <div>D3Page</div>;
+export default function D3Page() {
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <ModeNumberLines></ModeNumberLines>
+    </Box>
+  );
 }

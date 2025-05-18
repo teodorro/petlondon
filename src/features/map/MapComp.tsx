@@ -38,7 +38,7 @@ export default function MapComp() {
     setBikePoints(getAllBikePointLocations.data);
     if (bikeLayer.current != null)
       loadBikesToSchema(bikeLayer.current, bikePoints);
-  }, [getAllBikePointLocations.data, bikePoints, setBikePoints]);
+  }, [getAllBikePointLocations.data]);
 
   return <Box id="map" sx={{ width: 1, height: 1 }}></Box>;
 }
