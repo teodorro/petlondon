@@ -19,11 +19,14 @@ export const MainLayout = () => {
           component="main"
           sx={{
             flexGrow: 1,
+            marginTop: '64px',
             m: '0.4rem',
             ml: open ? `${drawerWidth}px` : '0.4rem',
             borderRadius: '1rem',
+            position: 'relative',
+            overflow: 'auto',
           }}
-          className="relative bg-gray-200"
+          className="bg-gray-200"
         >
           <Outlet />
         </Box>

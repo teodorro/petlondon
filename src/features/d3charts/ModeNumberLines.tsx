@@ -1,22 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { useAllValidLines, useLineModes } from '../../services/line-service';
+import {
+  useAllValidLinesQuery,
+  useLineModesQuery,
+} from '../../services/line-service';
 import { useLineStore } from '../../stores/line-store';
 import { createSelectors } from '../../utils/create-selectors';
 // import { useThemeStore } from '../../stores/theme-store';
 
 export default function ModeNumberLines() {
   const lineStoreSelectors = createSelectors(useLineStore);
+
   const lines = lineStoreSelectors.use.lines();
-  const setLines = lineStoreSelectors.use.setLines();
   const modes = lineStoreSelectors.use.modes();
+
+  const setLines = lineStoreSelectors.use.setLines();
   const setModes = lineStoreSelectors.use.setModes();
   // const themeStore = useThemeStore();
 
   const rawData = useRef<{ name: string; count: number }[]>([]);
 
-  const getLineModes = useLineModes();
-  const getAllValidLines = useAllValidLines();
+  const getLineModes = useLineModesQuery();
+  const getAllValidLines = useAllValidLinesQuery();
 
   useEffect(() => {
     setModes(getLineModes.data);
@@ -54,28 +59,23 @@ export default function ModeNumberLines() {
     const stubWidth = 150;
     const data = rawData.current;
     data.sort((a, b) => b.count - a.count);
-    const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+    const margin = { top: 2, right: 2, bottom: 2, left: 2 };
     const innerWidth = size.width - margin.left - margin.right;
     const innerHeight = size.height - margin.top - margin.bottom;
-    // console.log(size.width);
-    // console.log(svgD3Ref.current);
     if (svgD3Ref.current) {
       svgD3Ref.current.selectAll('*').remove();
-      console.log(size.width);
-      // console.log(width);
-      svgD3Ref.current.attr('width', size.width).attr('height', size.height);
+      svgD3Ref.current.attr('width', innerWidth).attr('height', innerHeight);
     } else {
       console.log(size.width);
       svgD3Ref.current = d3
         .select(containerRef.current)
         .append('svg')
-        .attr('width', size.width)
-        .attr('height', size.height)
-        .style('display', 'block') // removes unwanted inline spacing
-        .style('max-width', '100%') // prevents it from being wider than parent
-        .style('max-height', '100%') // same for height
-        .style('overflow', 'visible') // or 'hidden' if you want clipping
-        .style('border', '1px solid red');
+        .attr('width', innerWidth)
+        .attr('height', innerHeight)
+        .style('display', 'block')
+        .style('max-width', '100%')
+        .style('max-height', '100%')
+        .style('overflow', 'visible');
     }
     const innerChart = svgD3Ref.current
       .append('g')
@@ -148,15 +148,10 @@ export default function ModeNumberLines() {
       ref={containerRef}
       style={{
         width: '100%',
-        // height: '100%', // or fixed height
-        height: '400px',
-        // display: 'flex',
-        // flexDirection: 'column',
+        height: '500px',
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: 'var(--theme-background-color)',
-        // margin: 1,
-        border: '1px solid #0a0',
       }}
     ></div>
   );

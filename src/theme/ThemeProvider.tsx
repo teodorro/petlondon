@@ -25,6 +25,10 @@ export const AppThemeProvider = ({
       theme.palette.background.default
     );
     root.style.setProperty(
+      '--theme-background-paper-color',
+      theme.palette.background.paper
+    );
+    root.style.setProperty(
       '--theme-text-primary-color',
       theme.palette.text.primary
     );

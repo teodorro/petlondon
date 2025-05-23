@@ -5,7 +5,7 @@ import { ServiceType } from '../types/lines/service-type';
 import { DtoLine } from '../types/lines/dto-line';
 import { DtoLineMode } from '../types/lines/dto-line-mode';
 
-export function useAllValidLines(serviceType?: ServiceType, options?: any) {
+export function useAllValidLinesQuery(serviceType?: ServiceType, options?: any) {
   const url = `${baseUrl}/Line/Route${serviceType == null ? '' : "?serviceTypes="}${serviceType == null ? '' : serviceType}`;
   const queryFn = (): Promise<DtoLine[]> =>
     fetch(url).then((res) => res.json())
@@ -16,7 +16,7 @@ export function useAllValidLines(serviceType?: ServiceType, options?: any) {
   });
 }
 
-export function useLineModes(options?: any) {
+export function useLineModesQuery(options?: any) {
   const url = `${baseUrl}/Line/Meta/Modes`;
   const queryFn = (): Promise<DtoLineMode[]> =>
     fetch(url).then((res) => res.json())
