@@ -1,6 +1,7 @@
 import React from 'react';
 import ModeNumberLines from '../features/d3charts/ModeNumberLines';
 import { Box } from '@mui/material';
+import SequencySunburst from '../features/d3charts/SequencySunburst';
 
 export default function D3Page() {
   const chartSx = {
@@ -32,7 +33,7 @@ export default function D3Page() {
         }}
       >
         <Box sx={chartSx}>
-          <ModeNumberLines></ModeNumberLines>
+          <SequencySunburst></SequencySunburst>
         </Box>
         <Box sx={{ py: '0.5rem' }}></Box>
         <Box sx={chartSx}>
