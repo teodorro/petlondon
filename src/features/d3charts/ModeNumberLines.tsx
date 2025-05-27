@@ -62,11 +62,11 @@ export default function ModeNumberLines() {
     const margin = { top: 2, right: 2, bottom: 2, left: 2 };
     const innerWidth = size.width - margin.left - margin.right;
     const innerHeight = size.height - margin.top - margin.bottom;
+
     if (svgD3Ref.current) {
       svgD3Ref.current.selectAll('*').remove();
       svgD3Ref.current.attr('width', innerWidth).attr('height', innerHeight);
     } else {
-      console.log(size.width);
       svgD3Ref.current = d3
         .select(containerRef.current)
         .append('svg')
@@ -77,6 +77,7 @@ export default function ModeNumberLines() {
         .style('max-height', '100%')
         .style('overflow', 'visible');
     }
+
     const innerChart = svgD3Ref.current
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
@@ -130,7 +131,6 @@ export default function ModeNumberLines() {
     count === 0 ? 0 : (Math.log(count) + 1) * 10;
 
   const calcNumberOfLines = () => {
-    console.log('-----');
     if (modes == null || lines == null) return;
     rawData.current = [];
     const dataLog: { name: string; count: number }[] = [];

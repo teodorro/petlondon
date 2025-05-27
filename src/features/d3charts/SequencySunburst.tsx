@@ -1,37 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-export default function SequencySunburst() {
-  const breadcrumbHeight = 30;
-  const breadcrumbWidth = 75;
+interface SunburstNode {
+  name: string;
+  value?: number;
+  children?: SunburstNode[];
+}
 
+export default function SequencySunburst() {
   const containerRef = useRef<HTMLDivElement>(null);
   const csv = useRef<string[][]>([]);
-  // const data = useRef<{ name: string; children: unknown[] }>(null);
   const svgD3Ref =
     useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [radius, setRadius] = useState<number>(0);
-  const [data, setData] = useState<{
-    name: string;
-    children: unknown[];
-  } | null>(null);
+  const [data, setData] = useState<SunburstNode | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
-    sequence: d3.HierarchyRectangularNode<unknown>[];
+    sequence: d3.HierarchyRectangularNode<SunburstNode>[];
     percentage: string | number;
   }>({ sequence: [], percentage: 0 });
 
-  const handleMouseOver = (e) => {
-    setHoverInfo({ sequence: e.path, percentage: e.value });
-  };
-
-  // ResizeObserver to track container size
+  //ResizeObserver to track container size
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
       if (!entries.length) return;
       const { width, height } = entries[0].contentRect;
-      setSize({ width, height });
+      requestAnimationFrame(() => setSize({ width, height }));
     });
 
     if (containerRef.current) {
@@ -43,16 +38,30 @@ export default function SequencySunburst() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const partition = (data: unknown) =>
-    d3.partition().size([2 * Math.PI, radius * radius])(
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        setSize({ width: clientWidth, height: clientHeight });
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const partition = (data: SunburstNode) =>
+    d3.partition<SunburstNode>().size([2 * Math.PI, radius * radius])(
       d3
-        .hierarchy(data)
-        .sum((d) => d.value)
-        .sort((a, b) => b.value - a.value)
+        .hierarchy<SunburstNode>(data)
+        .sum((d) => (d as { value: number }).value)
+        .sort(
+          (a, b) =>
+            (b as { value: number }).value - (a as { value: number }).value
+        )
     );
 
   const color = d3
-    .scaleOrdinal()
+    .scaleOrdinal<string, string>()
     .domain(['home', 'product', 'search', 'account', 'other', 'end'])
     .range(['#5d85cf', '#7c6561', '#da7847', '#6fb971', '#9e70cf', '#bbbbbb']);
 
@@ -88,10 +97,6 @@ export default function SequencySunburst() {
       .append('g')
       .attr('transform', `translate(${size.width / 2}, ${size.height / 2})`);
 
-    // const element = svgD3Ref.current.node();
-    // if (element == null) return;
-    // element.value = { sequence: [], percentage: 0.0 };
-
     const label = innerChart
       .append('text')
       .attr('text-anchor', 'middle')
@@ -116,7 +121,7 @@ export default function SequencySunburst() {
       .text('of visits begin with this sequence');
 
     const arc = d3
-      .arc()
+      .arc<d3.HierarchyRectangularNode<SunburstNode>>()
       .startAngle((d) => d.x0)
       .endAngle((d) => d.x1)
       .padAngle(1 / radius)
@@ -125,7 +130,7 @@ export default function SequencySunburst() {
       .outerRadius((d) => Math.sqrt(d.y1) - 1);
 
     const mousearc = d3
-      .arc()
+      .arc<d3.HierarchyRectangularNode<SunburstNode>>()
       .startAngle((d) => d.x0)
       .endAngle((d) => d.x1)
       .innerRadius((d) => Math.sqrt(d.y0))
@@ -141,7 +146,7 @@ export default function SequencySunburst() {
         })
       )
       .join('path')
-      .attr('fill', (d) => color(d.data.name))
+      .attr('fill', (d) => color((d.data as SunburstNode).name))
       .attr('d', arc);
 
     innerChart
@@ -170,7 +175,10 @@ export default function SequencySunburst() {
         path.attr('fill-opacity', (node) =>
           sequence.indexOf(node) >= 0 ? 1.0 : 0.3
         );
-        const percentage = ((100 * d.value) / root.value).toPrecision(3);
+        const percentage = (
+          (100 * (d.value ?? 0)) /
+          (root.value ?? 1)
+        ).toPrecision(3);
         label
           .style('visibility', null)
           .select('.percentage')
@@ -190,8 +198,7 @@ export default function SequencySunburst() {
 
   const buildHierarchy = (csvData: string[][]) => {
     // Helper function that transforms the given CSV into a hierarchical format.
-    // const root = { name: 'root', children: [] };
-    const root: { name: string; children: unknown[] } = {
+    const root: SunburstNode = {
       name: 'root',
       children: [],
     };
@@ -214,7 +221,11 @@ export default function SequencySunburst() {
           // Not yet at the end of the sequence; move down the tree.
           let foundChild = false;
           for (let k = 0; k < children.length; k++) {
-            const child = children[k] as { name: string; children: unknown[] };
+            const child = children[k] as {
+              name: string;
+              children: unknown[];
+              value: unknown;
+            };
             if (child['name'] == nodeName) {
               childNode = children[k];
               foundChild = true;
@@ -226,31 +237,16 @@ export default function SequencySunburst() {
             childNode = { name: nodeName, children: [] };
             children.push(childNode);
           }
-          currentNode = childNode as { name: string; children: unknown[] };
+          currentNode = childNode as SunburstNode;
         } else {
           // Reached the end of the sequence; create a leaf node.
           childNode = { name: nodeName, value: size };
-          children.push(childNode);
+          children.push(childNode as SunburstNode);
         }
       }
     }
     return root;
   };
-
-  function breadcrumbPoints(d, i) {
-    const tipWidth = 10;
-    const points = [];
-    points.push('0,0');
-    points.push(`${breadcrumbWidth},0`);
-    points.push(`${breadcrumbWidth + tipWidth},${breadcrumbHeight / 2}`);
-    points.push(`${breadcrumbWidth},${breadcrumbHeight}`);
-    points.push(`0,${breadcrumbHeight}`);
-    if (i > 0) {
-      // Leftmost breadcrumb; don't include 6th vertex.
-      points.push(`${tipWidth},${breadcrumbHeight / 2}`);
-    }
-    return points.join(' ');
-  }
 
   return (
     <div
