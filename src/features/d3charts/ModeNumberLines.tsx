@@ -6,9 +6,13 @@ import {
 } from '../../services/line-service';
 import { useLineStore } from '../../stores/line-store';
 import { createSelectors } from '../../utils/create-selectors';
-// import { useThemeStore } from '../../stores/theme-store';
-
+import { Box } from '@mui/material';
+import { lineColors } from '../../utils/line-colors';
+import { makeKebabReadable } from '../../utils/text-utils';
 export default function ModeNumberLines() {
+  const numberWidth = 30;
+  const stubWidth = 150;
+
   const lineStoreSelectors = createSelectors(useLineStore);
 
   const lines = lineStoreSelectors.use.lines();
@@ -16,9 +20,9 @@ export default function ModeNumberLines() {
 
   const setLines = lineStoreSelectors.use.setLines();
   const setModes = lineStoreSelectors.use.setModes();
-  // const themeStore = useThemeStore();
 
   const rawData = useRef<{ name: string; count: number }[]>([]);
+  const maxCount = useRef<number>(0);
 
   const getLineModes = useLineModesQuery();
   const getAllValidLines = useAllValidLinesQuery();
@@ -56,10 +60,10 @@ export default function ModeNumberLines() {
   // D3 rendering
   useEffect(() => {
     if (!size.width || !size.height) return;
-    const stubWidth = 150;
     const data = rawData.current;
     data.sort((a, b) => b.count - a.count);
-    const margin = { top: 2, right: 2, bottom: 2, left: 2 };
+    maxCount.current = Math.max(...data.map((item) => item.count));
+    const margin = { top: 6, right: 2, bottom: 6, left: 2 };
     const innerWidth = size.width - margin.left - margin.right;
     const innerHeight = size.height - margin.top - margin.bottom;
 
@@ -81,10 +85,11 @@ export default function ModeNumberLines() {
     const innerChart = svgD3Ref.current
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
     const xScale = d3
-      .scaleLinear()
-      .domain([0, 90])
-      .range([0, innerWidth - stubWidth]);
+      .scaleLog()
+      .domain([1, maxCount.current + 1])
+      .range([0, innerWidth - stubWidth - numberWidth]);
     const yScale = d3
       .scaleBand()
       .domain(data.map((d) => d.name))
@@ -99,18 +104,23 @@ export default function ModeNumberLines() {
         .attr('transform', d => `translate(0, ${yScale(d.name)})`)
     // data rects
     // prettier-ignore
+
+    const getColor = (d: {name: string, count: number}): string => {
+      return lineColors[d.name];
+    }
+
     barAndLabel
       .append('rect')
-        .attr('width', (d) => xScale(getBarWidth(d.count)))
-        .attr("height", yScale.bandwidth())
-        .attr("x", stubWidth)
-        .attr("y", 0)
-        .attr("fill", d => d.name === "D" ? "yellowgreen" : "var(--theme-primary-color)");
+      .attr('width', (d) => xScale(d.count === 0 ? 1.05 : d.count + 1))
+      .attr('height', yScale.bandwidth())
+      .attr('x', stubWidth)
+      .attr('y', 0)
+      .attr('fill', (d) => getColor(d));
     // labels left
     // prettier-ignore
     barAndLabel
       .append("text")
-        .text(d => d.name)
+        .text(d => makeKebabReadable(d.name))
         .attr('x', stubWidth - 4)
         .attr('y', 16)
         .attr('text-anchor', 'end')
@@ -121,14 +131,11 @@ export default function ModeNumberLines() {
     barAndLabel
       .append("text")
         .text(d => d.count)
-        .attr('x', (d) => stubWidth + xScale(getBarWidth(d.count)) + 5)
+        .attr('x', (d) => stubWidth + xScale(d.count === 0 ? 1.05 : d.count + 1) + 4)
         .attr('y', 16)
         .style('fill', 'var(--theme-text-primary-color)')
         .style('font-size', '12px');
   }, [size, modes, lines]);
-
-  const getBarWidth = (count: number) =>
-    count === 0 ? 0 : (Math.log(count) + 1) * 10;
 
   const calcNumberOfLines = () => {
     if (modes == null || lines == null) return;
@@ -144,15 +151,26 @@ export default function ModeNumberLines() {
   };
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: '100%',
-        height: '500px',
-        overflow: 'hidden',
-        position: 'relative',
-        backgroundColor: 'var(--theme-background-color)',
-      }}
-    ></div>
+    <Box>
+      <Box
+        sx={{
+          backgroundColor: 'var(--theme-background-color)',
+          fontSize: '16pt',
+          pt: 2,
+        }}
+      >
+        Mode vs Number of lines
+      </Box>
+      <div
+        ref={containerRef}
+        style={{
+          width: '100%',
+          height: '500px',
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: 'var(--theme-background-color)',
+        }}
+      ></div>
+    </Box>
   );
 }
