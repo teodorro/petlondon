@@ -12,6 +12,7 @@ import { makeKebabReadable } from '../../utils/text-utils';
 export default function ModeNumberLines() {
   const numberWidth = 30;
   const stubWidth = 150;
+  const xScaleHeight = 30;
 
   const lineStoreSelectors = createSelectors(useLineStore);
 
@@ -90,25 +91,36 @@ export default function ModeNumberLines() {
       .scaleLog()
       .domain([1, maxCount.current + 1])
       .range([0, innerWidth - stubWidth - numberWidth]);
+
     const yScale = d3
       .scaleBand()
       .domain(data.map((d) => d.name))
-      .range([0, innerHeight])
+      .range([0, innerHeight - xScaleHeight])
       .paddingInner(0.2);
     // repositioning data
     // prettier-ignore
+
     const barAndLabel = innerChart
       .selectAll('g')
       .data(data)
       .join('g')
         .attr('transform', d => `translate(0, ${yScale(d.name)})`)
+
+    const tickValues = [1, 2, 6, 11, 26, 101, 251, 501];
+    const bottomAxis = d3
+      .axisBottom(xScale)
+      .tickValues(tickValues)
+      .tickFormat((d) => Math.round(+d - 1).toString());
+    innerChart
+      .append('g')
+      .attr(
+        'transform',
+        `translate(${stubWidth}, ${innerHeight - xScaleHeight + 5})`
+      )
+      .call(bottomAxis);
+
     // data rects
     // prettier-ignore
-
-    const getColor = (d: {name: string, count: number}): string => {
-      return lineColors[d.name];
-    }
-
     barAndLabel
       .append('rect')
       .attr('width', (d) => xScale(d.count === 0 ? 1.05 : d.count + 1))
@@ -148,6 +160,10 @@ export default function ModeNumberLines() {
       rawData.current.push({ name: mode.modeName, count: num });
       dataLog.push({ name: mode.modeName, count: Math.log(num) + 1 });
     });
+  };
+
+  const getColor = (d: { name: string; count: number }): string => {
+    return lineColors[d.name];
   };
 
   return (
