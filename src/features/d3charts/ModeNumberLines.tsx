@@ -67,6 +67,14 @@ export default function ModeNumberLines() {
   // D3 rendering
   useEffect(() => {
     if (!size.width || !size.height) return;
+    const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
+    const chartWidth = size.width - chartMargin.left - chartMargin.right;
+    const chartHeight = size.height - chartMargin.top - chartMargin.bottom;
+    initSvg(chartWidth, chartHeight);
+  }, [size.width, size.height]);
+
+  useEffect(() => {
+    if (!size.width || !size.height) return;
     const data = rawData.current;
     data.sort((a, b) => b.count - a.count);
     maxCount.current = Math.max(...data.map((item) => item.count));
@@ -74,7 +82,6 @@ export default function ModeNumberLines() {
     const chartWidth = size.width - chartMargin.left - chartMargin.right;
     const chartHeight = size.height - chartMargin.top - chartMargin.bottom;
 
-    initSvg(chartWidth, chartHeight);
     if (svgD3Ref.current == null) return;
     const svg = svgD3Ref.current;
 
