@@ -7,7 +7,7 @@ import {
 import { useLineStore } from '../../stores/line-store';
 import { createSelectors } from '../../utils/create-selectors';
 import { Box } from '@mui/material';
-import { lineColors } from '../../utils/line-colors';
+import { lineColors, LineModeName } from '../../utils/line-colors';
 import { makeKebabReadable } from '../../utils/text-utils';
 
 type Item = {
@@ -89,8 +89,8 @@ export default function ModeNumberLines() {
     const xScale = createXScale(chartWidth);
     const yScale = createYScale(chartHeight, data);
     const barGroups = addBarGroups(innerChart, data, yScale);
-    addBars(barGroups, xScale, yScale);
     addStub(barGroups);
+    addBars(barGroups, xScale, yScale);
     addCountRightToBars(barGroups, xScale);
     addBottomAxis(innerChart, xScale, chartHeight);
   }, [size, modes, lines]);
@@ -129,13 +129,16 @@ export default function ModeNumberLines() {
     barGroups
       .append('text')
       .text((d) => d.count)
+      .attr('y', 16)
+      .attr('x', stubWidth + 5)
+      .style('font-size', '12px')
+      .style('fill', 'var(--theme-text-primary-color)')
+      .transition()
+      .duration(500)
       .attr(
         'x',
         (d) => stubWidth + xScale(d.count === 0 ? 1.05 : d.count + 1) + 4
-      )
-      .attr('y', 16)
-      .style('fill', 'var(--theme-text-primary-color)')
-      .style('font-size', '12px');
+      );
   };
 
   const addStub = (
@@ -168,9 +171,11 @@ export default function ModeNumberLines() {
   ) => {
     barGroups
       .append('rect')
-      .attr('width', (d) => xScale(d.count === 0 ? 1.05 : d.count + 1))
       .attr('height', yScale.bandwidth())
       .attr('x', stubWidth)
+      .transition()
+      .duration(500)
+      .attr('width', (d) => xScale(d.count === 0 ? 1.05 : d.count + 1))
       .attr('y', 0)
       .attr('fill', (d) => getColor(d));
   };
@@ -241,7 +246,7 @@ export default function ModeNumberLines() {
     });
   };
 
-  const getColor = (d: Item): string => lineColors[d.name];
+  const getColor = (d: Item): string => lineColors[d.name as LineModeName];
 
   return (
     <Box>

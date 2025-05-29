@@ -1,4 +1,24 @@
-export const lineColors = {
+export type LineModeName =
+  | 'bus'
+  | 'national-rail'
+  | 'tube'
+  | 'overground'
+  | 'river-bus'
+  | 'cable-car'
+  | 'dlr'
+  | 'elizabeth-line'
+  | 'tram'
+  | 'coach'
+  | 'cycle'
+  | 'cycle-hire'
+  | 'interchange-keep-sitting'
+  | 'interchange-secure'
+  | 'replacement-bus'
+  | 'river-tour'
+  | 'taxi'
+  | 'walking';
+
+export const lineColors: Record<LineModeName, string> = {
   bus: '#A82B00',
   "national-rail": '#49A800',
   tube: '	#0019A8',
