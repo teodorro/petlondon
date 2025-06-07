@@ -76,7 +76,7 @@ export default function ModeNumberLines() {
 
   useEffect(() => {
     if (!size.width || !size.height) return;
-    const data = rawData.current;
+    const data = rawData.current.filter((item) => item.count > 0);
     data.sort((a, b) => b.count - a.count);
     maxCount.current = Math.max(...data.map((item) => item.count));
     const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
@@ -101,13 +101,7 @@ export default function ModeNumberLines() {
     xScale: d3.ScaleLogarithmic<number, number, never>,
     chartHeight: number
   ) => {
-    const tickValues = [1, 2, 6, 11, 26, 101, 251, 501];
-    const validTickValues = tickValues.filter(
-      (v) => v >= 1 && v <= maxCount.current + 1
-    );
     const bottomAxis = d3.axisBottom(xScale);
-    // .tickValues(validTickValues)
-    // .tickFormat((d) => Math.round(+d - 1).toString());
     innerChart
       .append('g')
       .attr(
@@ -129,7 +123,7 @@ export default function ModeNumberLines() {
     barGroups
       .append('text')
       .text((d) => d.count)
-      .attr('y', 16)
+      .attr('y', 24)
       .attr('x', stubWidth + 5)
       .style('font-size', '12px')
       .style('fill', 'var(--theme-text-primary-color)')
@@ -137,7 +131,7 @@ export default function ModeNumberLines() {
       .duration(500)
       .attr(
         'x',
-        (d) => stubWidth + xScale(d.count === 0 ? 1.05 : d.count + 1) + 4
+        (d) => stubWidth + xScale(d.count === 1 ? d.count + 0.05 : d.count) + 4
       );
   };
 
@@ -153,7 +147,7 @@ export default function ModeNumberLines() {
       .append('text')
       .text((d) => makeKebabReadable(d.name))
       .attr('x', stubWidth - 4)
-      .attr('y', 16)
+      .attr('y', 24)
       .attr('text-anchor', 'end')
       .style('fill', 'var(--theme-text-primary-color)')
       .style('font-size', '12px');
@@ -175,7 +169,7 @@ export default function ModeNumberLines() {
       .attr('x', stubWidth)
       .transition()
       .duration(500)
-      .attr('width', (d) => xScale(d.count === 0 ? 1.05 : d.count + 1))
+      .attr('width', (d) => xScale(d.count === 1 ? d.count + 0.05 : d.count))
       .attr('y', 0)
       .attr('fill', (d) => getColor(d));
   };
