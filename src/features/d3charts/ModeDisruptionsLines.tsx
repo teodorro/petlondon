@@ -84,6 +84,7 @@ export default function ModeDisruptionLines() {
       }
     });
   }, [
+    // to make it run after receiving all disruptions
     getLineDisruptions
       .map((q) => ((q.data as DtoDisruption[]) || null)?.length)
       .join('-'),
@@ -150,7 +151,7 @@ export default function ModeDisruptionLines() {
   const addInteractionLayers = (
     innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
     root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
-    mousearc: d3.Arc<any, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
+    mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
     path: d3.Selection<
       d3.BaseType | SVGPathElement,
       d3.HierarchyRectangularNode<ModeDisruptionNode>,
@@ -196,7 +197,7 @@ export default function ModeDisruptionLines() {
   const renderSegments = (
     innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
     root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
-    arc: d3.Arc<any, d3.HierarchyRectangularNode<ModeDisruptionNode>>
+    arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>
   ) => {
     return innerChart
       .append('g')
@@ -217,8 +218,8 @@ export default function ModeDisruptionLines() {
   const createArcGenerators = (
     radius: number
   ): {
-    arc: d3.Arc<any, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
-    mousearc: d3.Arc<any, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
+    arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
+    mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
   } => {
     const arc = d3
       .arc<d3.HierarchyRectangularNode<ModeDisruptionNode>>()
@@ -279,7 +280,7 @@ export default function ModeDisruptionLines() {
     svg
       .append('g')
       .attr('transform', `translate(${marginLeft}, ${marginTop})`)
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+      .attr('transform', `translate(${width / 2}, ${height / 2 + 20})`);
 
   const initSvg = (chartWidth: number, chartHeight: number) => {
     if (svgD3Ref.current) {
