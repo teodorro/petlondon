@@ -44,7 +44,7 @@ export default function SequencySunburst() {
         const { clientWidth, clientHeight } = containerRef.current;
         setSize({ width: clientWidth, height: clientHeight });
       }
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, []);

@@ -20,16 +20,21 @@ export default function ModeNumberLines() {
   const stubWidth = 150;
   const xScaleHeight = 30;
 
-  const lineStoreSelectors = createSelectors(useLineStore);
+  const selectors = createSelectors(useLineStore);
 
-  const lines = lineStoreSelectors.use.lines();
-  const modes = lineStoreSelectors.use.modes();
+  const lines = selectors.use.lines();
+  const modes = selectors.use.modes();
 
-  const setLines = lineStoreSelectors.use.setLines();
-  const setModes = lineStoreSelectors.use.setModes();
+  const setLines = selectors.use.setLines();
+  const setModes = selectors.use.setModes();
+
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   const rawData = useRef<Item[]>([]);
   const maxCount = useRef<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgD3Ref =
+    useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
 
   const getLineModes = useLineModesQuery();
   const getAllValidLines = useAllValidLinesQuery();
@@ -37,17 +42,14 @@ export default function ModeNumberLines() {
   useEffect(() => {
     setModes(getLineModes.data);
   }, [getLineModes.data]);
+
   useEffect(() => {
     setLines(getAllValidLines.data);
   }, [getAllValidLines.data]);
+
   useEffect(() => {
     calcNumberOfLines();
   }, [modes, lines]);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgD3Ref =
-    useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
 
   // ResizeObserver to track container size
   useEffect(() => {
@@ -64,7 +66,6 @@ export default function ModeNumberLines() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // D3 rendering
   useEffect(() => {
     if (!size.width || !size.height) return;
     const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
@@ -104,10 +105,9 @@ export default function ModeNumberLines() {
     const validTickValues = tickValues.filter(
       (v) => v >= 1 && v <= maxCount.current + 1
     );
-    const bottomAxis = d3
-      .axisBottom(xScale)
-      .tickValues(validTickValues)
-      .tickFormat((d) => Math.round(+d - 1).toString());
+    const bottomAxis = d3.axisBottom(xScale);
+    // .tickValues(validTickValues)
+    // .tickFormat((d) => Math.round(+d - 1).toString());
     innerChart
       .append('g')
       .attr(
@@ -207,7 +207,8 @@ export default function ModeNumberLines() {
     d3
       .scaleLog()
       .domain([1, maxCount.current + 1])
-      .range([0, chartWidth - stubWidth - numberWidth]);
+      .range([0, chartWidth - stubWidth - numberWidth])
+      .nice();
 
   const getInnerChart = (
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,

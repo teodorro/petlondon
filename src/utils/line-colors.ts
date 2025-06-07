@@ -16,25 +16,68 @@ export type LineModeName =
   | 'replacement-bus'
   | 'river-tour'
   | 'taxi'
-  | 'walking';
+  | 'walking'
+  | 'RealTime'
+  | 'Undefined'
+  | 'PlannedWork'
+  | 'Information'
+  | 'Event'
+  | 'Crowding'
+  | 'StatusAlert';
+
+export const colors: string[] = [
+  '#A82B00',
+  '#49A800',
+  '#0019A8',
+  '#E87C48',
+  '#40A7E4',
+  '#A5D99C',
+  '#1C2453',
+  '#02633E',
+  '#E6418D',
+  '#97A081',
+  '#CE0DC6',
+  '#762696',
+  '#B3C543',
+  '#EEDE8E',
+  '#17ECB8',
+  '#5DDB0E',
+  '#FE4825',
+  '#D7DC01',
+  '#3786A9',
+  '#7A371D',
+  '#C9BC6E',
+  '#97A081',
+  '#CE0DC6',
+  '#762696',
+  '#B3C543',
+];
 
 export const lineColors: Record<LineModeName, string> = {
-  bus: '#A82B00',
-  "national-rail": '#49A800',
-  tube: '	#0019A8',
-  overground: '#E87C48',
-  'river-bus': '#40A7E4',
-  'cable-car': '#A5D99C',
-  dlr: '#1C2453',
-  'elizabeth-line': '#02633E',
-  tram: '#E6418D',
-  coach: '#97A081',
-  cycle: '#CE0DC6',
-  'cycle-hire': '#762696',
-  'interchange-keep-sitting': '#B3C543',
-  'interchange-secure': '#EEDE8E',
-  'replacement-bus': '#17ECB8',
-  'river-tour': '#FE4825',
-  taxi: '#D7DC01',
-  walking: '#3786A9',
+  bus: colors[0],
+  "national-rail": colors[1],
+  tube: colors[2],
+  overground: colors[3],
+  'river-bus': colors[4],
+  'cable-car': colors[5],
+  dlr: colors[6],
+  'elizabeth-line': colors[7],
+  tram: colors[8],
+  coach: colors[9],
+  cycle: colors[10],
+  'cycle-hire': colors[11],
+  'interchange-keep-sitting': colors[12],
+  'interchange-secure': colors[13],
+  'replacement-bus': colors[14],
+  'river-tour': colors[15],
+  taxi: colors[16],
+  walking: colors[17],
+  ///////////////////////
+  RealTime: colors[18],
+  Undefined: colors[19],
+  PlannedWork: colors[20],
+  Information: colors[21],
+  Event: colors[22],
+  Crowding: colors[23],
+  StatusAlert: colors[24],
 }
