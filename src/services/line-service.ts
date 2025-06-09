@@ -5,10 +5,10 @@ import { ServiceType } from '../types/lines/service-type';
 import { DtoLine } from '../types/lines/dto-line';
 import { DtoLineMode } from '../types/lines/dto-line-mode';
 import { DtoSeverityCode } from '../types/lines/dto-severity-code';
-import { DtoDisruption } from '../types/lines/dto-disruption';
 
 export function useAllValidLinesQuery(serviceType?: ServiceType, options?: any) {
-  const url = `${baseUrl}/Line/Route${serviceType == null ? '' : "?serviceTypes="}${serviceType == null ? '' : serviceType}`;
+  const serviceTypes = `${serviceType == null ? '' : "?serviceTypes="}${serviceType == null ? '' : serviceType}`;
+  const url = `${baseUrl}/Line/Route${serviceTypes}`;
   const queryFn = (): Promise<DtoLine[]> =>
     fetch(url).then((res) => res.json())
   return useQuery<DtoLine[]>({
@@ -40,26 +40,7 @@ export function useSeverityCodesQuery(options?: any) {
   })
 }
 
-// export function useLineDisruptionsQuery(mode: string, options?: any) {
-//   const url = `${baseUrl}/Line/Mode/${mode}/Disruption`;
-//   const queryFn = (): Promise<DtoDisruption[]> =>
-//     fetch(url).then((res) => res.json())
-//   return useQuery<DtoDisruption[]>({
-//     queryKey: ['line-disruption', `${mode}`],
-//     queryFn,
-//     ...options
-//   })
-// }
-
 export function useLineDisruptionsQueries(modes: string[], options?: any) {
-  // const queryFn = (mode: string): Promise<DtoDisruption[]> =>
-  //   fetch(`${baseUrl}/Line/Mode/${mode}/Disruption`)
-  //     .then((res) => res.json())
-  // const queryFn = (mode: string): Promise<DtoDisruption[]> => {
-  //   const url = `${baseUrl}/Line/Mode/${mode}/Disruption`;
-  //   return fetch(url)
-  //     .then((res) => res.json())
-  // }
   return useQueries({
     queries: modes.map((mode) => ({
       queryKey: ['line-disruption', mode],

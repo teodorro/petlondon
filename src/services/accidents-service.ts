@@ -1,4 +1,4 @@
-import { DtoAccident } from "../types/dto-accident";
+import { DtoAccident } from "../types/accidents/dto-accident";
 import { useQuery } from '@tanstack/react-query'
 import { baseUrl } from "./services-config";
 

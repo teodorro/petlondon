@@ -1,4 +1,5 @@
 import { DtoCasualty } from "./dto-casualty"
+import { DtoVehicle } from "./dto-vehicle"
 
 export type DtoAccident = {
   id: number,
@@ -9,5 +10,5 @@ export type DtoAccident = {
   severity: string,
   borough: string,
   casualties: DtoCasualty[],
-  vehicles: { type: string }[]
+  vehicles: DtoVehicle[]
 }
