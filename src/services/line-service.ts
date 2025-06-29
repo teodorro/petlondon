@@ -6,13 +6,13 @@ import { DtoLine } from '../types/lines/dto-line';
 import { DtoLineMode } from '../types/lines/dto-line-mode';
 import { DtoSeverityCode } from '../types/lines/dto-severity-code';
 
-export function useAllValidLinesQuery(serviceType?: ServiceType, options?: any) {
+export function useValidLinesQuery(serviceType?: ServiceType, options?: any) {
   const serviceTypes = `${serviceType == null ? '' : "?serviceTypes="}${serviceType == null ? '' : serviceType}`;
   const url = `${baseUrl}/Line/Route${serviceTypes}`;
   const queryFn = (): Promise<DtoLine[]> =>
     fetch(url).then((res) => res.json())
   return useQuery<DtoLine[]>({
-    queryKey: ['all-lines'],
+    queryKey: ['lines'],
     queryFn,
     ...options
   });
@@ -47,6 +47,20 @@ export function useLineDisruptionsQueries(modes: string[], options?: any) {
       queryFn: ({ queryKey }) => {
         const [, mode] = queryKey as [string, string];
         const url = `${baseUrl}/Line/Mode/${mode}/Disruption`;
+        return fetch(url).then((res) => res.json());
+      },
+      ...options,
+    }))
+  })
+}
+
+export function useTubeRoutesQueries(lineIds: string[], options?: any) {
+  return useQueries({
+    queries: lineIds.map((lineId) => ({
+      queryKey: ['tube-route', lineId],
+      queryFn: ({ queryKey }) => {
+        const [, lineId] = queryKey as [string, string];
+        const url = `${baseUrl}/Line/${lineId}/Route/Sequence/inbound`;
         return fetch(url).then((res) => res.json());
       },
       ...options,

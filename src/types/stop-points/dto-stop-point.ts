@@ -1,5 +1,5 @@
 import { DtoAdditionalProperty } from "./dto-additional-property"
-import { DtoLightLine } from "./dto-light-line"
+import { DtoLightLine } from "../lines/dto-light-line"
 import { DtoLineGroup } from "./dto-line-group"
 import { DtoLineModeGroups } from "./dto-line-mode-groups"
 

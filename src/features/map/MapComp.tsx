@@ -1,73 +1,89 @@
 import React, { useEffect, useRef } from 'react';
 import 'ol/ol.css';
-import { Map, View } from 'ol';
+import { Feature, Map, View } from 'ol';
 import { fromLonLat } from 'ol/proj';
 import { Layer } from 'ol/layer';
 import { useThemeStore } from '../../stores/theme-store';
 import { Box } from '@mui/material';
-import { useAllBikePointLocations } from '../../services/bike-point-service';
 import { createSelectors } from '../../utils/create-selectors';
-import { useBikeStore } from '../../stores/bike-store';
-import { useStopPointsStore } from '../../stores/stop-points-store';
 import { getTileLayer } from './get-tile-layer';
-import { loadBikesToSchema } from './load-objects-to-schema';
-import { loadStopPointsToSchema } from './load-objects-to-schema';
-import { getBikeLayer } from './get-bike-layer';
-import { useGetStopPoints } from '../../services/stop-point-service';
-import { getStopPointsLayer } from './get-stop-points-layer';
+import {
+  useTubeRoutesQueries,
+  useValidLinesQuery,
+} from '../../services/line-service';
+import { useLineStore } from '../../stores/line-store';
+import { TUBE } from '../../types/lines/dto-line';
+import { getLinesLayer } from './get-lines-layer';
+import { DtoRouteSequence } from '../../types/lines/dto-route-sequence';
+import { loadLinesToSchema } from './load-objects-to-schema';
+import { createPointFeature } from './create-point-feature';
+import { Point } from 'ol/geom';
+import VectorSource from 'ol/source/Vector';
 
 export default function MapComp() {
   const tileLayer = useRef<Layer>(null);
-  // const bikeLayer = useRef<Layer>(null);
-  const stopPointsLayer = useRef<Layer>(null);
+  const linesLayer = useRef<Layer>(null);
 
   const themeSelectors = createSelectors(useThemeStore);
   const themeMode = themeSelectors.use.mode();
 
-  // const bikeSelectors = createSelectors(useBikeStore);
-  // const setBikePoints = bikeSelectors.use.setBikePoints();
-  // const bikePoints = bikeSelectors.use.bikePoints();
+  const lineSelectors = createSelectors(useLineStore);
+  const lines = lineSelectors.use.lines();
+  const routeSequences = lineSelectors.use.routeSequences();
+  const setLines = lineSelectors.use.setLines();
+  const setRouteSequences = lineSelectors.use.setRouteSequences();
 
-  const stopPointsSelectors = createSelectors(useStopPointsStore);
-  const setStopPoints = stopPointsSelectors.use.setStopPoints();
-  const stopPoints = stopPointsSelectors.use.stopPoints();
+  const getAllValidLines = useValidLinesQuery();
+  const getTubeRoutesQueries = useTubeRoutesQueries(
+    lines == null || lines.length === 0
+      ? []
+      : lines.filter((line) => line.modeName === TUBE).map((line) => line.id),
+    {
+      enabled: false,
+    }
+  );
 
-  // const getAllBikePointLocations = useAllBikePointLocations();
-  const getTubeStopPoints = useGetStopPoints('tube');
+  useEffect(() => {
+    setLines(getAllValidLines.data);
+  }, [getAllValidLines.data]);
+  useEffect(() => {
+    getTubeRoutesQueries.forEach((query) => query.refetch());
+  }, [lines]);
+
+  useEffect(() => {
+    const allDataReady = getTubeRoutesQueries.every((query) => query.data);
+    if (!allDataReady) return;
+
+    const routesSeqs: DtoRouteSequence[] = [];
+    getTubeRoutesQueries.forEach((query) => {
+      if (query.data != null && linesLayer.current != null) {
+        const routeSequence = query.data as DtoRouteSequence;
+        routesSeqs.push(routeSequence);
+      }
+    });
+    setRouteSequences(routesSeqs);
+  }, [
+    getTubeRoutesQueries
+      .map((q) => (q.data as DtoRouteSequence)?.lineId || null)
+      .join('-'),
+  ]);
+  useEffect(() => {
+    if (linesLayer.current == null) return;
+    (linesLayer.current.getSource() as VectorSource).clear();
+    routeSequences.forEach((routeSequence) =>
+      loadLinesToSchema(linesLayer.current!, routeSequence)
+    );
+  }, [routeSequences]);
 
   useEffect(() => {
     const view = getView();
     tileLayer.current = getTileLayer(themeMode);
-    // bikeLayer.current = getBikeLayer();
-    // loadBikesToSchema(bikeLayer.current, bikePoints);
-    stopPointsLayer.current = getStopPointsLayer();
-    loadStopPointsToSchema(stopPointsLayer.current, stopPoints);
-    const map = getMap(view, [
-      tileLayer.current,
-      // bikeLayer.current,
-      stopPointsLayer.current,
-    ]);
+    linesLayer.current = getLinesLayer();
+    const map = getMap(view, [tileLayer.current, linesLayer.current]);
     return () => {
       map.setTarget(undefined);
     };
   }, [themeMode]);
-
-  // useEffect(() => {
-  //   setBikePoints(getAllBikePointLocations.data);
-  //   if (bikeLayer.current != null)
-  //     loadBikesToSchema(bikeLayer.current, bikePoints);
-  // }, [getAllBikePointLocations.data]);
-
-  useEffect(() => {
-    setStopPoints(
-      getTubeStopPoints.data == null ? [] : getTubeStopPoints.data.stopPoints
-    );
-  }, [getTubeStopPoints.data]);
-
-  useEffect(() => {
-    if (stopPointsLayer.current != null)
-      loadStopPointsToSchema(stopPointsLayer.current, stopPoints);
-  }, [stopPoints]);
 
   return <Box id="map" sx={{ width: 1, height: 1 }}></Box>;
 }

@@ -6,7 +6,7 @@ import { createSelectors } from '../../utils/create-selectors';
 import {
   useLineModesQuery,
   useLineDisruptionsQueries,
-  useAllValidLinesQuery,
+  useValidLinesQuery,
 } from '../../services/line-service';
 import { lineColors, LineModeName } from '../../utils/line-colors';
 import { DtoDisruption } from '../../types/lines/dto-disruption';
@@ -44,7 +44,7 @@ export default function ModeDisruptionLines() {
   const addDisruption = selectors.use.addDisruption();
 
   const getLineModes = useLineModesQuery();
-  const getAllValidLines = useAllValidLinesQuery();
+  const getAllValidLines = useValidLinesQuery();
   const getLineDisruptions = useLineDisruptionsQueries(
     modes == null || lines == null
       ? []

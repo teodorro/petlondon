@@ -3,6 +3,8 @@ import { DtoLineStatus } from "./dto-line-status"
 import { DtoRouteSection } from "./dto-route-section"
 import { ServiceType } from "./service-type"
 
+export const TUBE = 'tube';
+
 export type DtoLine = {
   id: string,
   name: string,

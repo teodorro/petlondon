@@ -1,3 +1,6 @@
+/**
+ * Turned out too boring chart :/ Mode-Severity parts are differs too little
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Box } from '@mui/material';

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import {
-  useAllValidLinesQuery,
+  useValidLinesQuery,
   useLineModesQuery,
 } from '../../services/line-service';
 import { useLineStore } from '../../stores/line-store';
@@ -37,7 +37,7 @@ export default function ModeNumberLines() {
     useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
 
   const getLineModes = useLineModesQuery();
-  const getAllValidLines = useAllValidLinesQuery();
+  const getAllValidLines = useValidLinesQuery();
 
   useEffect(() => {
     setModes(getLineModes.data);
