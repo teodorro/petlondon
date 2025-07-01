@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import "ol/ol.css";
 import { Map, View } from "ol";
 import { fromLonLat } from "ol/proj";

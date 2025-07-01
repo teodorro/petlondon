@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 import {
   useValidLinesQuery,
   useLineModesQuery,
-} from '../../services/line-service';
-import { useLineStore } from '../../stores/line-store';
-import { createSelectors } from '../../utils/create-selectors';
-import { Box } from '@mui/material';
-import { lineColors, LineModeName } from '../../utils/line-colors';
-import { makeKebabReadable } from '../../utils/text-utils';
+} from "../../services/line-service";
+import { useLineStore } from "../../stores/line-store";
+import { createSelectors } from "../../utils/create-selectors";
+import { Box } from "@mui/material";
+import { lineColors, LineModeName } from "../../utils/line-colors";
+import { makeKebabReadable } from "../../utils/text-utils";
 
 type Item = {
   name: string;
@@ -40,11 +40,11 @@ export default function ModeNumberLines() {
   const getAllValidLines = useValidLinesQuery();
 
   useEffect(() => {
-    setModes(getLineModes.data);
+    setModes(getLineModes.data ?? []);
   }, [getLineModes.data]);
 
   useEffect(() => {
-    setLines(getAllValidLines.data);
+    setLines(getAllValidLines.data ?? []);
   }, [getAllValidLines.data]);
 
   useEffect(() => {
@@ -99,14 +99,14 @@ export default function ModeNumberLines() {
   const addBottomAxis = (
     innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
     xScale: d3.ScaleLogarithmic<number, number, never>,
-    chartHeight: number
+    chartHeight: number,
   ) => {
     const bottomAxis = d3.axisBottom(xScale);
     innerChart
-      .append('g')
+      .append("g")
       .attr(
-        'transform',
-        `translate(${stubWidth}, ${chartHeight - xScaleHeight + 5})`
+        "transform",
+        `translate(${stubWidth}, ${chartHeight - xScaleHeight + 5})`,
       )
       .call(bottomAxis);
   };
@@ -118,20 +118,20 @@ export default function ModeNumberLines() {
       SVGGElement,
       unknown
     >,
-    xScale: d3.ScaleLogarithmic<number, number, never>
+    xScale: d3.ScaleLogarithmic<number, number, never>,
   ) => {
     barGroups
-      .append('text')
+      .append("text")
       .text((d) => d.count)
-      .attr('y', 24)
-      .attr('x', stubWidth + 5)
-      .style('font-size', '12px')
-      .style('fill', 'var(--theme-text-primary-color)')
+      .attr("y", 24)
+      .attr("x", stubWidth + 5)
+      .style("font-size", "12px")
+      .style("fill", "var(--theme-text-primary-color)")
       .transition()
       .duration(500)
       .attr(
-        'x',
-        (d) => stubWidth + xScale(d.count === 1 ? d.count + 0.05 : d.count) + 4
+        "x",
+        (d) => stubWidth + xScale(d.count === 1 ? d.count + 0.05 : d.count) + 4,
       );
   };
 
@@ -141,16 +141,16 @@ export default function ModeNumberLines() {
       Item,
       SVGGElement,
       unknown
-    >
+    >,
   ) => {
     barGroups
-      .append('text')
+      .append("text")
       .text((d) => makeKebabReadable(d.name))
-      .attr('x', stubWidth - 4)
-      .attr('y', 24)
-      .attr('text-anchor', 'end')
-      .style('fill', 'var(--theme-text-primary-color)')
-      .style('font-size', '12px');
+      .attr("x", stubWidth - 4)
+      .attr("y", 24)
+      .attr("text-anchor", "end")
+      .style("fill", "var(--theme-text-primary-color)")
+      .style("font-size", "12px");
   };
 
   const addBars = (
@@ -161,33 +161,33 @@ export default function ModeNumberLines() {
       unknown
     >,
     xScale: d3.ScaleLogarithmic<number, number, never>,
-    yScale: d3.ScaleBand<string>
+    yScale: d3.ScaleBand<string>,
   ) => {
     barGroups
-      .append('rect')
-      .attr('height', yScale.bandwidth())
-      .attr('x', stubWidth)
+      .append("rect")
+      .attr("height", yScale.bandwidth())
+      .attr("x", stubWidth)
       .transition()
       .duration(500)
-      .attr('width', (d) => xScale(d.count === 1 ? d.count + 0.05 : d.count))
-      .attr('y', 0)
-      .attr('fill', (d) => getColor(d));
+      .attr("width", (d) => xScale(d.count === 1 ? d.count + 0.05 : d.count))
+      .attr("y", 0)
+      .attr("fill", (d) => getColor(d));
   };
 
   const addBarGroups = (
     innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
     data: Item[],
-    yScale: d3.ScaleBand<string>
+    yScale: d3.ScaleBand<string>,
   ): d3.Selection<d3.BaseType | SVGGElement, Item, SVGGElement, unknown> =>
     innerChart
-      .selectAll('g')
+      .selectAll("g")
       .data(data)
-      .join('g')
-      .attr('transform', (d) => `translate(0, ${yScale(d.name)})`);
+      .join("g")
+      .attr("transform", (d) => `translate(0, ${yScale(d.name)})`);
 
   const createYScale = (
     chartHeight: number,
-    data: Item[]
+    data: Item[],
   ): d3.ScaleBand<string> =>
     d3
       .scaleBand()
@@ -196,7 +196,7 @@ export default function ModeNumberLines() {
       .paddingInner(0.2);
 
   const createXScale = (
-    chartWidth: number
+    chartWidth: number,
   ): d3.ScaleLogarithmic<number, number, never> =>
     d3
       .scaleLog()
@@ -207,24 +207,24 @@ export default function ModeNumberLines() {
   const getInnerChart = (
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
     marginLeft: number,
-    marginTop: number
+    marginTop: number,
   ): d3.Selection<SVGGElement, unknown, null, undefined> =>
-    svg.append('g').attr('transform', `translate(${marginLeft}, ${marginTop})`);
+    svg.append("g").attr("transform", `translate(${marginLeft}, ${marginTop})`);
 
   const initSvg = (chartWidth: number, chartHeight: number) => {
     if (svgD3Ref.current) {
-      svgD3Ref.current.selectAll('*').remove();
-      svgD3Ref.current.attr('width', chartWidth).attr('height', chartHeight);
+      svgD3Ref.current.selectAll("*").remove();
+      svgD3Ref.current.attr("width", chartWidth).attr("height", chartHeight);
     } else {
       svgD3Ref.current = d3
         .select(containerRef.current)
-        .append('svg')
-        .attr('width', chartWidth)
-        .attr('height', chartHeight)
-        .style('display', 'block')
-        .style('max-width', '100%')
-        .style('max-height', '100%')
-        .style('overflow', 'visible');
+        .append("svg")
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+        .style("display", "block")
+        .style("max-width", "100%")
+        .style("max-height", "100%")
+        .style("overflow", "visible");
     }
   };
 
@@ -234,7 +234,7 @@ export default function ModeNumberLines() {
     const dataLog: Item[] = [];
     modes.forEach((mode) => {
       const num = lines.filter(
-        (line) => line.modeName === mode.modeName
+        (line) => line.modeName === mode.modeName,
       ).length;
       rawData.current.push({ name: mode.modeName, count: num });
       dataLog.push({ name: mode.modeName, count: Math.log(num) + 1 });
@@ -247,8 +247,8 @@ export default function ModeNumberLines() {
     <Box>
       <Box
         sx={{
-          backgroundColor: 'var(--theme-background-color)',
-          fontSize: '16pt',
+          backgroundColor: "var(--theme-background-color)",
+          fontSize: "16pt",
           pt: 2,
         }}
       >
@@ -257,11 +257,11 @@ export default function ModeNumberLines() {
       <div
         ref={containerRef}
         style={{
-          width: '100%',
-          height: '500px',
-          overflow: 'hidden',
-          position: 'relative',
-          backgroundColor: 'var(--theme-background-color)',
+          width: "100%",
+          height: "500px",
+          overflow: "hidden",
+          position: "relative",
+          backgroundColor: "var(--theme-background-color)",
         }}
       ></div>
     </Box>

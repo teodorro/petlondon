@@ -1,5 +1,5 @@
 import { Box, Drawer, useMediaQuery } from "@mui/material";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import MiniDrawerStyled from "./MiniDrawer";
 import { useDrawerStore } from "../../stores/drawer-store";
 import MenuComp from "./MenuComp";

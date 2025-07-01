@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
 import { useLineStore } from "../../stores/line-store";
