@@ -1,15 +1,14 @@
-import { Layer } from 'ol/layer';
-import { DtoBikePoint } from '../../types/dto-bike-point';
-import { createPointFeature } from './create-point-feature';
-import VectorSource from 'ol/source/Vector';
-import { DtoStopPoint } from '../../types/stop-points/dto-stop-point';
-import { DtoRouteSequence } from '../../types/lines/dto-route-sequence';
-import { createLineFeature } from './create-line-feature';
-import { Point } from 'ol/geom';
+import { Layer } from "ol/layer";
+import { DtoBikePoint } from "../../types/dto-bike-point";
+import { createPointFeature } from "./create-point-feature";
+import VectorSource from "ol/source/Vector";
+import { DtoStopPoint } from "../../types/stop-points/dto-stop-point";
+import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
+import { createLineFeature } from "./create-line-feature";
 
 export function loadBikesToSchema(
   layer: Layer,
-  bikePoints: DtoBikePoint[]
+  bikePoints: DtoBikePoint[],
 ): void {
   (layer.getSource() as VectorSource).clear();
   if (bikePoints == null) return;
@@ -21,7 +20,7 @@ export function loadBikesToSchema(
 
 export function loadStopPointsToSchema(
   layer: Layer,
-  stopPoints: DtoStopPoint[]
+  stopPoints: DtoStopPoint[],
 ): void {
   (layer.getSource() as VectorSource).clear();
   if (stopPoints == null) return;
@@ -33,7 +32,7 @@ export function loadStopPointsToSchema(
 
 export function loadLinesToSchema(
   layer: Layer,
-  routeSequence: DtoRouteSequence
+  routeSequence: DtoRouteSequence,
 ): void {
   // (layer.getSource() as VectorSource).clear();
   if (routeSequence == null) return;

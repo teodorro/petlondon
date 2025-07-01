@@ -1,14 +1,12 @@
-import { Box, List, ListItem } from '@mui/material';
-import React, { ReactElement } from 'react';
-import { useDrawerStore } from '../../stores/drawer-store';
-import { MenuItemNames } from '../../types/menu-item-names';
-import { useNavigate } from 'react-router-dom';
-// import { useAccidentsQuery } from '../../services/accidents-service';
+import { Box, List, ListItem } from "@mui/material";
+import { ReactElement } from "react";
+import { useDrawerStore } from "../../stores/drawer-store";
+import { MenuItemNames } from "../../types/menu-item-names";
+import { useNavigate } from "react-router-dom";
 
 export default function MenuComp() {
   const drawerStore = useDrawerStore();
   const navigate = useNavigate();
-  // const getAccidentsQuery = useAccidentsQuery(2010);
 
   const items = [
     { id: 1, name: MenuItemNames.Test },
@@ -35,27 +33,27 @@ export default function MenuComp() {
   const getOpenLayersNavItem = () => {
     return getDefaultNavItem(
       MenuItemNames.OpenLayers,
-      'openlayers.svg',
-      '/openlayers'
+      "openlayers.svg",
+      "/openlayers",
     );
   };
 
   const getD3NavItem = () => {
-    return getDefaultNavItem(MenuItemNames.D3, 'd3js.svg', '/d3');
+    return getDefaultNavItem(MenuItemNames.D3, "d3js.svg", "/d3");
   };
 
   const getAgGridNavItem = () => {
-    return getDefaultNavItem(MenuItemNames.AGgrid, 'ag-grid.png', '/aggrid');
+    return getDefaultNavItem(MenuItemNames.AGgrid, "ag-grid.png", "/aggrid");
   };
 
   const getUnknownNavItem = () => {
-    return getDefaultNavItem(MenuItemNames.Unknown, 'vite.svg', '');
+    return getDefaultNavItem(MenuItemNames.Unknown, "vite.svg", "");
   };
 
   const getDefaultNavItem = (name: string, filename: string, path: string) => {
     return (
       <Box
-        sx={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }}
+        sx={{ display: "flex", flexDirection: "row", cursor: "pointer" }}
         onClick={() => navigate(path)}
       >
         <img src={filename} alt={name} className="w-8 h-8"></img>
@@ -68,7 +66,7 @@ export default function MenuComp() {
   const getTestItem = () => {
     return (
       <Box
-        sx={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }}
+        sx={{ display: "flex", flexDirection: "row", cursor: "pointer" }}
         onClick={() => testFn()}
       ></Box>
     );

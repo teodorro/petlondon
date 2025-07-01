@@ -1,8 +1,8 @@
 /**
  * D3 Example transfered to React
  */
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
+import { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
 
 interface SunburstNode {
   name: string;
@@ -19,7 +19,7 @@ export default function SequencySunburst() {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [radius, setRadius] = useState<number>(0);
   const [data, setData] = useState<SunburstNode | null>(null);
-  const [hoverInfo, setHoverInfo] = useState<{
+  const [, setHoverInfo] = useState<{
     sequence: d3.HierarchyRectangularNode<SunburstNode>[];
     percentage: string | number;
   }>({ sequence: [], percentage: 0 });
@@ -59,14 +59,14 @@ export default function SequencySunburst() {
         .sum((d) => (d as { value: number }).value)
         .sort(
           (a, b) =>
-            (b as { value: number }).value - (a as { value: number }).value
-        )
+            (b as { value: number }).value - (a as { value: number }).value,
+        ),
     );
 
   const color = d3
     .scaleOrdinal<string, string>()
-    .domain(['home', 'product', 'search', 'account', 'other', 'end'])
-    .range(['#5d85cf', '#7c6561', '#da7847', '#6fb971', '#9e70cf', '#bbbbbb']);
+    .domain(["home", "product", "search", "account", "other", "end"])
+    .range(["#5d85cf", "#7c6561", "#da7847", "#6fb971", "#9e70cf", "#bbbbbb"]);
 
   // D3 rendering
   useEffect(() => {
@@ -82,46 +82,46 @@ export default function SequencySunburst() {
     setRadius(innerWidth / 2);
 
     if (svgD3Ref.current) {
-      svgD3Ref.current.selectAll('*').remove();
-      svgD3Ref.current.attr('width', innerWidth).attr('height', innerHeight);
+      svgD3Ref.current.selectAll("*").remove();
+      svgD3Ref.current.attr("width", innerWidth).attr("height", innerHeight);
     } else {
       svgD3Ref.current = d3
         .select(containerRef.current)
-        .append('svg')
-        .attr('width', innerWidth)
-        .attr('height', innerHeight)
-        .style('display', 'block')
-        .style('max-width', '100%')
-        .style('max-height', '100%')
-        .style('overflow', 'visible');
+        .append("svg")
+        .attr("width", innerWidth)
+        .attr("height", innerHeight)
+        .style("display", "block")
+        .style("max-width", "100%")
+        .style("max-height", "100%")
+        .style("overflow", "visible");
     }
 
     const innerChart = svgD3Ref.current
-      .append('g')
-      .attr('transform', `translate(${size.width / 2}, ${size.height / 2})`);
+      .append("g")
+      .attr("transform", `translate(${size.width / 2}, ${size.height / 2})`);
 
     const label = innerChart
-      .append('text')
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#888')
-      .style('visibility', 'hidden');
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("fill", "#888")
+      .style("visibility", "hidden");
 
     label
-      .append('tspan')
-      .attr('class', 'percentage')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('dy', '-0.1em')
-      .attr('font-size', '2em')
-      .text('');
+      .append("tspan")
+      .attr("class", "percentage")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("dy", "-0.1em")
+      .attr("font-size", "2em")
+      .text("");
 
     label
-      .append('tspan')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('dy', '1.5em')
-      .attr('font-size', '0.75em')
-      .text('of visits begin with this sequence');
+      .append("tspan")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("dy", "1.5em")
+      .attr("font-size", "0.75em")
+      .text("of visits begin with this sequence");
 
     const arc = d3
       .arc<d3.HierarchyRectangularNode<SunburstNode>>()
@@ -140,59 +140,59 @@ export default function SequencySunburst() {
       .outerRadius(radius);
 
     const path = innerChart
-      .append('g')
-      .selectAll('path')
+      .append("g")
+      .selectAll("path")
       .data(
         root.descendants().filter((d) => {
           // Don't draw the root node, and for efficiency, filter out nodes that would be too small to see
           return d.depth && d.x1 - d.x0 > 0.001;
-        })
+        }),
       )
-      .join('path')
-      .attr('fill', (d) => color((d.data as SunburstNode).name))
-      .attr('d', arc);
+      .join("path")
+      .attr("fill", (d) => color((d.data as SunburstNode).name))
+      .attr("d", arc);
 
     innerChart
-      .append('g')
-      .attr('fill', 'none')
-      .attr('pointer-events', 'all')
-      .on('mouseleave', () => {
-        path.attr('fill-opacity', 1);
-        label.style('visibility', 'hidden');
+      .append("g")
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .on("mouseleave", () => {
+        path.attr("fill-opacity", 1);
+        label.style("visibility", "hidden");
         // Update the value of this view
         setHoverInfo({ sequence: [], percentage: 0.0 });
       })
-      .selectAll('path')
+      .selectAll("path")
       .data(
         root.descendants().filter((d) => {
           // Don't draw the root node, and for efficiency, filter out nodes that would be too small to see
           return d.depth && d.x1 - d.x0 > 0.001;
-        })
+        }),
       )
-      .join('path')
-      .attr('d', mousearc)
-      .on('mouseenter', (event, d) => {
+      .join("path")
+      .attr("d", mousearc)
+      .on("mouseenter", (_event, d) => {
         // Get the ancestors of the current segment, minus the root
         const sequence = d.ancestors().reverse().slice(1);
         // Highlight the ancestors
-        path.attr('fill-opacity', (node) =>
-          sequence.indexOf(node) >= 0 ? 1.0 : 0.3
+        path.attr("fill-opacity", (node) =>
+          sequence.indexOf(node) >= 0 ? 1.0 : 0.3,
         );
         const percentage = (
           (100 * (d.value ?? 0)) /
           (root.value ?? 1)
         ).toPrecision(3);
         label
-          .style('visibility', null)
-          .select('.percentage')
-          .text(percentage + '%');
+          .style("visibility", null)
+          .select(".percentage")
+          .text(percentage + "%");
         // Update the value of this view with the currently hovered sequence and percentage
         setHoverInfo({ sequence, percentage });
       });
   }, [size, data]);
 
   const loadData = async () => {
-    const response = await fetch('/visit-sequences@1.csv');
+    const response = await fetch("/visit-sequences@1.csv");
     const text = await response.text();
     csv.current = d3.csvParseRows(text);
     setData(buildHierarchy(csv.current));
@@ -202,7 +202,7 @@ export default function SequencySunburst() {
   const buildHierarchy = (csvData: string[][]) => {
     // Helper function that transforms the given CSV into a hierarchical format.
     const root: SunburstNode = {
-      name: 'root',
+      name: "root",
       children: [],
     };
     for (let i = 0; i < csvData.length; i++) {
@@ -212,7 +212,7 @@ export default function SequencySunburst() {
         // e.g. if this is a header row
         continue;
       }
-      const parts = sequence.split('-');
+      const parts = sequence.split("-");
       let currentNode = root;
       for (let j = 0; j < parts.length; j++) {
         if (currentNode == null) continue;
@@ -229,7 +229,7 @@ export default function SequencySunburst() {
               children: unknown[];
               value: unknown;
             };
-            if (child['name'] == nodeName) {
+            if (child["name"] == nodeName) {
               childNode = children[k];
               foundChild = true;
               break;
@@ -255,11 +255,11 @@ export default function SequencySunburst() {
     <div
       ref={containerRef}
       style={{
-        width: '100%',
-        height: '600px',
-        overflow: 'hidden',
-        position: 'relative',
-        backgroundColor: 'var(--theme-background-color)',
+        width: "100%",
+        height: "600px",
+        overflow: "hidden",
+        position: "relative",
+        backgroundColor: "var(--theme-background-color)",
       }}
     ></div>
   );

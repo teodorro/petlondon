@@ -6,10 +6,23 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint src --ext .ts,.tsx",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ],
+    "*.css": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -23,6 +36,7 @@
     "ag-grid-react": "^33.2.4",
     "axios": "^1.8.4",
     "d3": "^7.9.0",
+    "eslint-config-prettier": "^10.1.5",
     "ol": "^10.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -46,8 +60,11 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.2",
     "postcss": "^8.5.3",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.4",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",

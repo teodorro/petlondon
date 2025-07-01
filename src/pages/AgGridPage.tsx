@@ -1,7 +1,3 @@
-import React from 'react';
-
-type Props = {};
-
-export default function AgGridPage({}: Props) {
+export default function AgGridPage() {
   return <div>AgGridPage</div>;
 }

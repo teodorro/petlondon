@@ -1,58 +1,59 @@
 // material-ui
-import { styled, Theme } from '@mui/material/styles';
-import Drawer from '@mui/material/Drawer';
+import { styled, Theme } from "@mui/material/styles";
+import Drawer, { DrawerProps } from "@mui/material/Drawer";
 
-interface StyledDrawerProps {
-  theme: Theme;
+interface StyledDrawerProps extends Partial<DrawerProps> {
+  theme?: Theme;
   open: boolean;
 }
 
 // project imports
 const drawerWidth = 123;
 
-function baseMixin(theme: Theme) {
+function baseMixin(theme: Theme | undefined) {
   return {
     zIndex: 1099,
-    borderRight: 'none',
-    background: theme.palette.background.default,
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen + 200,
+    borderRight: "none",
+    background: theme?.palette.background.default,
+    overflowX: "hidden",
+    transition: theme?.transitions.create("width", {
+      easing: theme?.transitions.easing.sharp,
+      duration: theme?.transitions.duration.leavingScreen + 200,
     }),
   };
 }
 
-function openedMixin(theme: Theme) {
+function openedMixin(theme: Theme | undefined) {
   return {
     ...baseMixin(theme),
     width: drawerWidth,
   };
 }
 
-function closedMixin(theme: Theme) {
+function closedMixin(theme: Theme | undefined) {
   return {
     ...baseMixin(theme),
     width: 72,
   };
 }
 
-const styleFn = ({ theme, open }: StyledDrawerProps) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const styleFn: (props: StyledDrawerProps) => any = ({ theme, open }) => ({
   flexShrink: 0,
-  whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
   ...(open && {
     ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme),
+    "& .MuiDrawer-paper": openedMixin(theme),
   }),
   ...(!open && {
     ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme),
+    "& .MuiDrawer-paper": closedMixin(theme),
   }),
 });
 
 const MiniDrawerStyled = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== 'open',
+  shouldForwardProp: (prop) => prop !== "open",
 })(styleFn);
 
 export default MiniDrawerStyled;
