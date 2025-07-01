@@ -1,24 +1,22 @@
-import React, { useEffect, useRef } from 'react';
-import 'ol/ol.css';
-import { Feature, Map, View } from 'ol';
-import { fromLonLat } from 'ol/proj';
-import { Layer } from 'ol/layer';
-import { useThemeStore } from '../../stores/theme-store';
-import { Box } from '@mui/material';
-import { createSelectors } from '../../utils/create-selectors';
-import { getTileLayer } from './get-tile-layer';
+import React, { useEffect, useRef } from "react";
+import "ol/ol.css";
+import { Map, View } from "ol";
+import { fromLonLat } from "ol/proj";
+import { Layer } from "ol/layer";
+import { useThemeStore } from "../../stores/theme-store";
+import { Box } from "@mui/material";
+import { createSelectors } from "../../utils/create-selectors";
+import { getTileLayer } from "./get-tile-layer";
 import {
   useTubeRoutesQueries,
   useValidLinesQuery,
-} from '../../services/line-service';
-import { useLineStore } from '../../stores/line-store';
-import { TUBE } from '../../types/lines/dto-line';
-import { getLinesLayer } from './get-lines-layer';
-import { DtoRouteSequence } from '../../types/lines/dto-route-sequence';
-import { loadLinesToSchema } from './load-objects-to-schema';
-import { createPointFeature } from './create-point-feature';
-import { Point } from 'ol/geom';
-import VectorSource from 'ol/source/Vector';
+} from "../../services/line-service";
+import { useLineStore } from "../../stores/line-store";
+import { TUBE } from "../../types/lines/dto-line";
+import { getLinesLayer } from "./get-lines-layer";
+import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
+import { loadLinesToSchema } from "./load-objects-to-schema";
+import VectorSource from "ol/source/Vector";
 
 export default function MapComp() {
   const tileLayer = useRef<Layer>(null);
@@ -40,11 +38,11 @@ export default function MapComp() {
       : lines.filter((line) => line.modeName === TUBE).map((line) => line.id),
     {
       enabled: false,
-    }
+    },
   );
 
   useEffect(() => {
-    setLines(getAllValidLines.data);
+    setLines(getAllValidLines.data ?? []);
   }, [getAllValidLines.data]);
   useEffect(() => {
     getTubeRoutesQueries.forEach((query) => query.refetch());
@@ -65,13 +63,13 @@ export default function MapComp() {
   }, [
     getTubeRoutesQueries
       .map((q) => (q.data as DtoRouteSequence)?.lineId || null)
-      .join('-'),
+      .join("-"),
   ]);
   useEffect(() => {
     if (linesLayer.current == null) return;
     (linesLayer.current.getSource() as VectorSource).clear();
     routeSequences.forEach((routeSequence) =>
-      loadLinesToSchema(linesLayer.current!, routeSequence)
+      loadLinesToSchema(linesLayer.current!, routeSequence),
     );
   }, [routeSequences]);
 
@@ -98,7 +96,7 @@ const getView = (): View => {
 
 const getMap = (view: View, layers: Layer[]): Map => {
   return new Map({
-    target: 'map',
+    target: "map",
     layers: layers,
     view,
   });

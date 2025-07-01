@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
-import { Box } from '@mui/material';
-import { useLineStore } from '../../stores/line-store';
-import { createSelectors } from '../../utils/create-selectors';
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from "d3";
+import { Box } from "@mui/material";
+import { useLineStore } from "../../stores/line-store";
+import { createSelectors } from "../../utils/create-selectors";
 import {
   useLineModesQuery,
   useLineDisruptionsQueries,
   useValidLinesQuery,
-} from '../../services/line-service';
-import { lineColors, LineModeName } from '../../utils/line-colors';
-import { DtoDisruption } from '../../types/lines/dto-disruption';
-import { makeKebabReadable } from '../../utils/text-utils';
+} from "../../services/line-service";
+import { lineColors, LineModeName } from "../../utils/line-colors";
+import { DtoDisruption } from "../../types/lines/dto-disruption";
+import { makeKebabReadable } from "../../utils/text-utils";
 
 interface ModeDisruptionNode {
   name: string;
@@ -43,27 +43,27 @@ export default function ModeDisruptionLines() {
   const setLines = selectors.use.setLines();
   const addDisruption = selectors.use.addDisruption();
 
-  const getLineModes = useLineModesQuery();
+  const getLineModes = useLineModesQuery({ enabled: false });
   const getAllValidLines = useValidLinesQuery();
   const getLineDisruptions = useLineDisruptionsQueries(
     modes == null || lines == null
       ? []
       : modes
           .filter((mode) =>
-            lines.some((line) => line.modeName === mode.modeName)
+            lines.some((line) => line.modeName === mode.modeName),
           )
           .map((mode) => mode.modeName),
     {
       enabled: false,
-    }
+    },
   );
 
   useEffect(() => {
-    setModes(getLineModes.data);
+    setModes(getLineModes.data ?? []);
   }, [getLineModes.data]);
 
   useEffect(() => {
-    setLines(getAllValidLines.data);
+    setLines(getAllValidLines.data ?? []);
   }, [getAllValidLines.data]);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function ModeDisruptionLines() {
     // to make it run after receiving all disruptions
     getLineDisruptions
       .map((q) => ((q.data as DtoDisruption[]) || null)?.length)
-      .join('-'),
+      .join("-"),
   ]);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export default function ModeDisruptionLines() {
       chartMargin.left,
       chartMargin.top,
       chartWidth,
-      chartHeight
+      chartHeight,
     );
 
     const label = getLabel(innerChart);
@@ -158,38 +158,38 @@ export default function ModeDisruptionLines() {
       SVGGElement,
       unknown
     >,
-    label: d3.Selection<SVGTextElement, unknown, null, undefined>
+    label: d3.Selection<SVGTextElement, unknown, null, undefined>,
   ) => {
     innerChart
-      .append('g')
-      .attr('fill', 'none')
-      .attr('pointer-events', 'all')
-      .on('mouseleave', () => {
-        path.attr('fill-opacity', 1);
-        label.style('visibility', 'hidden');
+      .append("g")
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .on("mouseleave", () => {
+        path.attr("fill-opacity", 1);
+        label.style("visibility", "hidden");
       })
-      .selectAll('path')
+      .selectAll("path")
       .data(
         root.descendants().filter((d) => {
           return d.depth && d.x1 - d.x0 > 0.001;
-        })
+        }),
       )
-      .join('path')
-      .attr('d', mousearc)
-      .on('mouseenter', (event, d) => {
+      .join("path")
+      .attr("d", mousearc)
+      .on("mouseenter", (event, d) => {
         const sequence = d.ancestors().reverse().slice(1);
-        path.attr('fill-opacity', (node) =>
-          sequence.indexOf(node) >= 0 ? 1.0 : 0.3
+        path.attr("fill-opacity", (node) =>
+          sequence.indexOf(node) >= 0 ? 1.0 : 0.3,
         );
         label
-          .style('visibility', null)
-          .select('.upper-text')
+          .style("visibility", null)
+          .select(".upper-text")
           .text(makeKebabReadable(d.data.name));
         label
-          .style('visibility', null)
-          .select('.lower-text')
+          .style("visibility", null)
+          .select(".lower-text")
           .text(
-            d.data == null || d.data.info == null ? '' : d.data.info.toString()
+            d.data == null || d.data.info == null ? "" : d.data.info.toString(),
           );
       });
   };
@@ -197,26 +197,26 @@ export default function ModeDisruptionLines() {
   const renderSegments = (
     innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
     root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
-    arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>
+    arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
   ) => {
     return innerChart
-      .append('g')
-      .selectAll('path')
+      .append("g")
+      .selectAll("path")
       .data(
         root.descendants().filter((d) => {
           return d.depth && d.x1 - d.x0 > 0.001;
-        })
+        }),
       )
-      .join('path')
+      .join("path")
       .attr(
-        'fill',
-        (d) => lineColors[(d.data as ModeDisruptionNode).name as LineModeName]
+        "fill",
+        (d) => lineColors[(d.data as ModeDisruptionNode).name as LineModeName],
       )
-      .attr('d', arc);
+      .attr("d", arc);
   };
 
   const createArcGenerators = (
-    radius: number
+    radius: number,
   ): {
     arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
     mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
@@ -241,31 +241,31 @@ export default function ModeDisruptionLines() {
   };
 
   const getLabel = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>
+    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
   ) => {
     const label = innerChart
-      .append('text')
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#888')
-      .style('visibility', 'hidden');
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("fill", "#888")
+      .style("visibility", "hidden");
 
     label
-      .append('tspan')
-      .attr('class', 'upper-text')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('dy', '-0.1em')
-      .attr('font-size', '2em')
-      .text('');
+      .append("tspan")
+      .attr("class", "upper-text")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("dy", "-0.1em")
+      .attr("font-size", "2em")
+      .text("");
 
     label
-      .append('tspan')
-      .attr('class', 'lower-text')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('dy', '1.5em')
-      .attr('font-size', '0.75em')
-      .text('');
+      .append("tspan")
+      .attr("class", "lower-text")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("dy", "1.5em")
+      .attr("font-size", "0.75em")
+      .text("");
 
     return label;
   };
@@ -275,27 +275,27 @@ export default function ModeDisruptionLines() {
     marginLeft: number,
     marginTop: number,
     width: number,
-    height: number
+    height: number,
   ): d3.Selection<SVGGElement, unknown, null, undefined> =>
     svg
-      .append('g')
-      .attr('transform', `translate(${marginLeft}, ${marginTop})`)
-      .attr('transform', `translate(${width / 2}, ${height / 2 + 20})`);
+      .append("g")
+      .attr("transform", `translate(${marginLeft}, ${marginTop})`)
+      .attr("transform", `translate(${width / 2}, ${height / 2 + 20})`);
 
   const initSvg = (chartWidth: number, chartHeight: number) => {
     if (svgD3Ref.current) {
-      svgD3Ref.current.selectAll('*').remove();
-      svgD3Ref.current.attr('width', chartWidth).attr('height', chartHeight);
+      svgD3Ref.current.selectAll("*").remove();
+      svgD3Ref.current.attr("width", chartWidth).attr("height", chartHeight);
     } else {
       svgD3Ref.current = d3
         .select(containerRef.current)
-        .append('svg')
-        .attr('width', chartWidth)
-        .attr('height', chartHeight)
-        .style('display', 'block')
-        .style('max-width', '100%')
-        .style('max-height', '100%')
-        .style('overflow', 'visible');
+        .append("svg")
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+        .style("display", "block")
+        .style("max-width", "100%")
+        .style("max-height", "100%")
+        .style("overflow", "visible");
     }
   };
 
@@ -306,8 +306,8 @@ export default function ModeDisruptionLines() {
         .sum((d) => (d as { value: number }).value)
         .sort(
           (a, b) =>
-            (b as { value: number }).value - (a as { value: number }).value
-        )
+            (b as { value: number }).value - (a as { value: number }).value,
+        ),
     );
 
   const calcNumberOfLines = () => {
@@ -315,7 +315,7 @@ export default function ModeDisruptionLines() {
     numberOfLines.current = [];
     modes.forEach((mode) => {
       const num = lines.filter(
-        (line) => line.modeName === mode.modeName
+        (line) => line.modeName === mode.modeName,
       ).length;
       numberOfLines.current.push({ mode: mode.modeName, count: num });
     });
@@ -323,7 +323,7 @@ export default function ModeDisruptionLines() {
 
   const buildHierarchy = (): ModeDisruptionNode => {
     const root: ModeDisruptionNode = {
-      name: 'root',
+      name: "root",
       children: [],
     };
     if (modes == null || disruptions == null || lines == null) return root;
@@ -364,7 +364,7 @@ export default function ModeDisruptionLines() {
         ];
         uniqueCategories.forEach((category) => {
           const categoryDisruptions = itemDisruptions.filter(
-            (d) => d.category === category
+            (d) => d.category === category,
           );
           const childNode: ModeDisruptionNode = {
             name: category,
@@ -387,8 +387,8 @@ export default function ModeDisruptionLines() {
     <Box>
       <Box
         sx={{
-          backgroundColor: 'var(--theme-background-color)',
-          fontSize: '16pt',
+          backgroundColor: "var(--theme-background-color)",
+          fontSize: "16pt",
           pt: 2,
         }}
       >
@@ -397,11 +397,11 @@ export default function ModeDisruptionLines() {
       <div
         ref={containerRef}
         style={{
-          width: '100%',
-          height: '500px',
-          overflow: 'hidden',
-          position: 'relative',
-          backgroundColor: 'var(--theme-background-color)',
+          width: "100%",
+          height: "500px",
+          overflow: "hidden",
+          position: "relative",
+          backgroundColor: "var(--theme-background-color)",
         }}
       ></div>
     </Box>
