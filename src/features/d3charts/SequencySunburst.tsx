@@ -171,7 +171,7 @@ export default function SequencySunburst() {
       )
       .join("path")
       .attr("d", mousearc)
-      .on("mouseenter", (event, d) => {
+      .on("mouseenter", (_event, d) => {
         // Get the ancestors of the current segment, minus the root
         const sequence = d.ancestors().reverse().slice(1);
         // Highlight the ancestors

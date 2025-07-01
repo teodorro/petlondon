@@ -1,36 +1,36 @@
 // material-ui
 import { styled, Theme } from "@mui/material/styles";
-import Drawer from "@mui/material/Drawer";
+import Drawer, { DrawerProps } from "@mui/material/Drawer";
 
-interface StyledDrawerProps {
-  theme: Theme;
+interface StyledDrawerProps extends Partial<DrawerProps> {
+  theme?: Theme;
   open: boolean;
 }
 
 // project imports
 const drawerWidth = 123;
 
-function baseMixin(theme: Theme) {
+function baseMixin(theme: Theme | undefined) {
   return {
     zIndex: 1099,
     borderRight: "none",
-    background: theme.palette.background.default,
+    background: theme?.palette.background.default,
     overflowX: "hidden",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen + 200,
+    transition: theme?.transitions.create("width", {
+      easing: theme?.transitions.easing.sharp,
+      duration: theme?.transitions.duration.leavingScreen + 200,
     }),
   };
 }
 
-function openedMixin(theme: Theme) {
+function openedMixin(theme: Theme | undefined) {
   return {
     ...baseMixin(theme),
     width: drawerWidth,
   };
 }
 
-function closedMixin(theme: Theme) {
+function closedMixin(theme: Theme | undefined) {
   return {
     ...baseMixin(theme),
     width: 72,

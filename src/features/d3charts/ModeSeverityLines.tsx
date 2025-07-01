@@ -1,7 +1,7 @@
 /**
  * Turned out too boring chart :/ Mode-Severity parts are differs too little
  */
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
 import { useLineStore } from "../../stores/line-store";
@@ -182,7 +182,7 @@ export default function ModeSeverityLines() {
       )
       .join("path")
       .attr("d", mousearc)
-      .on("mouseenter", (event, d) => {
+      .on("mouseenter", (_event, d) => {
         // Get the ancestors of the current segment, minus the root
         const sequence = d.ancestors().reverse().slice(1);
         // Highlight the ancestors

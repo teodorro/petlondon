@@ -1,11 +1,10 @@
-import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import React from 'react';
-import { useDrawerStore } from '../stores/drawer-store';
-import { useThemeStore } from '../stores/theme-store';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { createSelectors } from '../utils/create-selectors';
+import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useDrawerStore } from "../stores/drawer-store";
+import { useThemeStore } from "../stores/theme-store";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import { createSelectors } from "../utils/create-selectors";
 
 export default function AppHeader() {
   const drawerStoreSelectors = createSelectors(useDrawerStore);
@@ -20,16 +19,16 @@ export default function AppHeader() {
         color="inherit"
         elevation={0}
         sx={{
-          bgcolor: 'background.default',
+          bgcolor: "background.default",
         }}
       >
         <Toolbar disableGutters>
           <img
             // src="london-transport-white.svg"
             src={
-              themeMode === 'light'
-                ? 'london-transport-light.svg'
-                : 'london-transport-dark.svg'
+              themeMode === "light"
+                ? "london-transport-light.svg"
+                : "london-transport-dark.svg"
             }
             alt="london-transport"
             className="h-16 mr-2"
@@ -42,7 +41,7 @@ export default function AppHeader() {
             component="div"
             sx={{
               flexGrow: 1,
-              textAlign: 'left',
+              textAlign: "left",
             }}
           >
             {/* Petlondon */}
@@ -51,9 +50,9 @@ export default function AppHeader() {
             edge="end"
             color="inherit"
             onClick={themeToggleMode}
-            sx={{ mr: '1rem' }}
+            sx={{ mr: "1rem" }}
           >
-            {themeMode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+            {themeMode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
           </IconButton>
         </Toolbar>
       </AppBar>

@@ -65,7 +65,6 @@ export default function Sidebar() {
       ) : (
         <MiniDrawerStyled variant="permanent" open={drawerStore.open}>
           <Box sx={{ mt: 10 }}>{drawer}</Box>
-          {/* <Box sx={{ mt: 10 }}>{drawer}</Box> */}
         </MiniDrawerStyled>
       )}
     </Box>

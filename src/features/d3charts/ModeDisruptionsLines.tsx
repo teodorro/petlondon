@@ -176,7 +176,7 @@ export default function ModeDisruptionLines() {
       )
       .join("path")
       .attr("d", mousearc)
-      .on("mouseenter", (event, d) => {
+      .on("mouseenter", (_event, d) => {
         const sequence = d.ancestors().reverse().slice(1);
         path.attr("fill-opacity", (node) =>
           sequence.indexOf(node) >= 0 ? 1.0 : 0.3,
