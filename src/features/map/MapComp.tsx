@@ -6,16 +6,16 @@ import { Layer } from "ol/layer";
 import { useThemeStore } from "../../stores/theme-store";
 import { Box } from "@mui/material";
 import { createSelectors } from "../../utils/create-selectors";
-import { getTileLayer } from "./get-tile-layer";
+import { getTileLayer } from "./get-layer/get-tile-layer";
 import {
   useTubeRoutesQueries,
   useValidLinesQuery,
 } from "../../services/line-service";
 import { useLineStore } from "../../stores/line-store";
 import { TUBE } from "../../types/lines/dto-line";
-import { getLinesLayer } from "./get-lines-layer";
+import { getLinesLayer } from "./get-layer/get-lines-layer";
 import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
-import { loadLinesToSchema } from "./load-objects-to-schema";
+import { loadLinesToSchema } from "./load-objects-to-schema/load-lines-to-schema";
 import VectorSource from "ol/source/Vector";
 
 export default function MapComp() {
@@ -44,6 +44,7 @@ export default function MapComp() {
   useEffect(() => {
     setLines(getAllValidLines.data ?? []);
   }, [getAllValidLines.data]);
+
   useEffect(() => {
     getTubeRoutesQueries.forEach((query) => query.refetch());
   }, [lines]);
@@ -65,6 +66,7 @@ export default function MapComp() {
       .map((q) => (q.data as DtoRouteSequence)?.lineId || null)
       .join("-"),
   ]);
+
   useEffect(() => {
     if (linesLayer.current == null) return;
     (linesLayer.current.getSource() as VectorSource).clear();
@@ -90,7 +92,7 @@ const getView = (): View => {
   return new View({
     center: fromLonLat([-0.12, 51.51]),
     zoom: 10,
-    extent: [-202513.341856, 6561017.966314, 186327.095083, 6856950.728974],
+    // extent: [-202513.341856, 6561017.966314, 186327.095083, 6856950.728974],
   });
 };
 
