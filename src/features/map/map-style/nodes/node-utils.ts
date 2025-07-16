@@ -45,10 +45,7 @@ export const getNodeIcon = (feature: Feature): Icon => {
   return img;
 };
 
-export const getNodeCircle = (
-  feature: Feature,
-  resolution: number,
-): ImageStyle => {
+export const getNodeCircle = (resolution: number): ImageStyle => {
   const img = new Circle({
     fill: defaultNodeFill,
     stroke: getDefaultNodeStroke(resolution),
