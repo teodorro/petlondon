@@ -44,7 +44,7 @@ describe("createAndSaveNodeStyle", () => {
 
 describe("setNodeStyle", () => {
   it("Checks created EdgeStyle", () => {
-    const feature = new Feature({ type: "Point" });
+    const feature = new Feature({ type: "Point", geometry: new Point([1, 2]) });
     const resolution = NODE_RESOLUTION_BREAKPOINT - 1;
     const nodeStyles = new Map<Feature, NodeStyle>();
     const style: Style = new Style();
