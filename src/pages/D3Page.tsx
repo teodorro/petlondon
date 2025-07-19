@@ -1,6 +1,6 @@
-import ModeNumberLines from "../features/d3charts/ModeNumberLines";
 import { Box } from "@mui/material";
 import ModeDisruptionsLines from "../features/d3charts/ModeDisruptionsLines";
+import ModeNumberLines from "../features/d3charts/ModeNumberLines";
 
 export default function D3Page() {
   const chartSx = {

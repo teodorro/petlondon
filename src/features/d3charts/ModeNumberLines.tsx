@@ -6,7 +6,7 @@ import {
 } from "../../services/line-service";
 import { useLineStore } from "../../stores/line-store";
 import { createSelectors } from "../../utils/create-selectors";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { makeKebabReadable } from "../../utils/text-utils";
 
@@ -19,6 +19,7 @@ export default function ModeNumberLines() {
   const numberWidth = 30;
   const stubWidth = 150;
   const xScaleHeight = 30;
+  const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
 
   const selectors = createSelectors(useLineStore);
 
@@ -35,9 +36,17 @@ export default function ModeNumberLines() {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgD3Ref =
     useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
+  const xScale = useRef<d3.ScaleLogarithmic<number, number, never>>(
+    d3.scaleLog().domain([1, 10]).range([0, 100]),
+  );
 
   const getLineModes = useLineModesQuery();
   const getAllValidLines = useValidLinesQuery();
+
+  const getChartWidth = (): number =>
+    Math.max(0, size.width - chartMargin.left - chartMargin.right);
+  const getChartHeight = (): number =>
+    Math.max(0, size.height - chartMargin.top - chartMargin.bottom);
 
   useEffect(() => {
     setModes(getLineModes.data ?? []);
@@ -68,122 +77,170 @@ export default function ModeNumberLines() {
 
   useEffect(() => {
     if (!size.width || !size.height) return;
-    const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
-    const chartWidth = size.width - chartMargin.left - chartMargin.right;
-    const chartHeight = size.height - chartMargin.top - chartMargin.bottom;
+    const chartWidth = getChartWidth();
+    const chartHeight = getChartHeight();
     initSvg(chartWidth, chartHeight);
-  }, [size.width, size.height]);
-
-  useEffect(() => {
-    if (!size.width || !size.height) return;
-    const data = rawData.current.filter((item) => item.count > 0);
-    data.sort((a, b) => b.count - a.count);
-    maxCount.current = Math.max(...data.map((item) => item.count));
-    const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
-    const chartWidth = size.width - chartMargin.left - chartMargin.right;
-    const chartHeight = size.height - chartMargin.top - chartMargin.bottom;
-
     if (svgD3Ref.current == null) return;
-    const svg = svgD3Ref.current;
 
-    const innerChart = getInnerChart(svg, chartMargin.left, chartMargin.top);
-    const xScale = createXScale(chartWidth);
+    console.log(`modes: ${modes.length}, lines: ${lines.length}`);
+
+    const data = getPreparedData();
+    const innerChart = getInnerChart(
+      svgD3Ref.current,
+      chartMargin.left,
+      chartMargin.top,
+    );
+    createXScale(chartWidth);
     const yScale = createYScale(chartHeight, data);
     const barGroups = addBarGroups(innerChart, data, yScale);
-    addStub(barGroups);
-    addBars(barGroups, xScale, yScale);
-    addCountRightToBars(barGroups, xScale);
-    addBottomAxis(innerChart, xScale, chartHeight);
-  }, [size, modes, lines]);
+    addStub(barGroups, yScale);
+    addBars(barGroups, yScale);
+    addCountRightToBars(barGroups, yScale);
+    addBottomAxis(innerChart, chartHeight);
+  }, [size, modes, lines, svgD3Ref, rawData.current]);
+
+  const getPreparedData = (): Item[] => {
+    let data = rawData.current.filter((item) => item.count > 0);
+    data = data.sort((a, b) => b.count - a.count);
+    maxCount.current = Math.max(...data.map((item) => item.count));
+    return data;
+  };
 
   const addBottomAxis = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
-    xScale: d3.ScaleLogarithmic<number, number, never>,
+    innerChart: d3.Selection<
+      d3.BaseType | SVGGElement,
+      null,
+      SVGSVGElement,
+      unknown
+    >,
     chartHeight: number,
   ) => {
-    const bottomAxis = d3.axisBottom(xScale);
-    innerChart
-      .append("g")
+    const bottomAxisGroup = innerChart
+      .selectAll(".axis-x")
+      .data([null])
+      .join(
+        (enter) => enter.append("g").attr("class", "axis-x"),
+        (update) => update,
+        (exit) => exit.remove(),
+      )
+      .attr("class", "axis-x")
       .attr(
         "transform",
         `translate(${stubWidth}, ${chartHeight - xScaleHeight + 5})`,
-      )
-      .call(bottomAxis);
+      );
+    const bottomAxis = d3.axisBottom(xScale.current);
+    bottomAxisGroup
+      .transition()
+      .duration(500)
+      .call(bottomAxis as any);
+    bottomAxisGroup
+      .selectAll(".tick text")
+      .attr("transform", "translate(5,0)")
+      .style("text-anchor", "end");
   };
 
   const addCountRightToBars = (
-    barGroups: d3.Selection<
-      d3.BaseType | SVGGElement,
-      Item,
-      SVGGElement,
-      unknown
-    >,
-    xScale: d3.ScaleLogarithmic<number, number, never>,
+    barGroups: d3.Selection<SVGGElement, Item, d3.BaseType | SVGGElement, null>,
+    yScale: d3.ScaleBand<string>,
   ) => {
     barGroups
-      .append("text")
-      .text((d) => d.count)
-      .attr("y", 24)
-      .attr("x", stubWidth + 5)
-      .style("font-size", "12px")
-      .style("fill", "var(--theme-text-primary-color)")
-      .transition()
-      .duration(500)
-      .attr(
-        "x",
-        (d) => stubWidth + xScale(d.count === 1 ? d.count + 0.05 : d.count) + 4,
+      .selectAll("text.count-label")
+      .data((d) => [d])
+      .join(
+        (enter) => {
+          const entered = enter
+            .append("text")
+            .text((d) => d.count)
+            .attr("class", "count-label")
+            .attr("x", stubWidth + 5)
+            .attr("y", yScale.bandwidth() / 2)
+            .attr("dy", "0.35em")
+            .style("font-size", "12px")
+            .style("fill", "var(--theme-text-primary-color)");
+          entered
+            .transition()
+            .duration(500)
+            .attr("x", (d) => getBarEndX(d));
+          return entered;
+        },
+        (update) =>
+          update
+            .text((d) => d.count)
+            .transition()
+            .duration(500)
+            .attr("x", (d) => getBarEndX(d)),
       );
   };
 
+  const getBarEndX = (d: Item): number =>
+    stubWidth + xScale.current(d.count === 1 ? d.count + 0.05 : d.count) + 4;
+
   const addStub = (
-    barGroups: d3.Selection<
-      d3.BaseType | SVGGElement,
-      Item,
-      SVGGElement,
-      unknown
-    >,
+    barGroups: d3.Selection<SVGGElement, Item, d3.BaseType | SVGGElement, null>,
+    yScale: d3.ScaleBand<string>,
   ) => {
     barGroups
-      .append("text")
-      .text((d) => makeKebabReadable(d.name))
-      .attr("x", stubWidth - 4)
-      .attr("y", 24)
-      .attr("text-anchor", "end")
-      .style("fill", "var(--theme-text-primary-color)")
-      .style("font-size", "12px");
+      .selectAll("text.name-label")
+      .data((d) => [d])
+      .join((enter) =>
+        enter
+          .append("text")
+          .text((d) => makeKebabReadable(d.name))
+          .attr("class", "name-label")
+          .attr("x", stubWidth - 4)
+          .attr("y", yScale.bandwidth() / 2)
+          .attr("dy", "0.35em")
+          .attr("text-anchor", "end")
+          .style("font-size", "12px")
+          .style("fill", "var(--theme-text-primary-color)"),
+      );
   };
 
   const addBars = (
-    barGroups: d3.Selection<
-      d3.BaseType | SVGGElement,
-      Item,
-      SVGGElement,
-      unknown
-    >,
-    xScale: d3.ScaleLogarithmic<number, number, never>,
+    barGroups: d3.Selection<SVGGElement, Item, d3.BaseType | SVGGElement, null>,
     yScale: d3.ScaleBand<string>,
   ) => {
     barGroups
-      .append("rect")
-      .attr("height", yScale.bandwidth())
+      .selectAll("rect")
+      .data((d) => [d])
+      .join("rect")
       .attr("x", stubWidth)
+      .attr("y", 0)
+      .attr("height", yScale.bandwidth())
+      .attr("fill", (d) => getColor(d))
       .transition()
       .duration(500)
-      .attr("width", (d) => xScale(d.count === 1 ? d.count + 0.05 : d.count))
-      .attr("y", 0)
-      .attr("fill", (d) => getColor(d));
+      .attr("width", (d) =>
+        xScale.current(d.count === 1 ? d.count + 0.05 : d.count),
+      );
   };
 
   const addBarGroups = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
+    innerChart: d3.Selection<
+      d3.BaseType | SVGGElement,
+      null,
+      SVGSVGElement,
+      unknown
+    >,
     data: Item[],
     yScale: d3.ScaleBand<string>,
-  ): d3.Selection<d3.BaseType | SVGGElement, Item, SVGGElement, unknown> =>
-    innerChart
-      .selectAll("g")
-      .data(data)
-      .join("g")
-      .attr("transform", (d) => `translate(0, ${yScale(d.name)})`);
+  ): d3.Selection<SVGGElement, Item, d3.BaseType | SVGGElement, null> => {
+    const barGroups = innerChart
+      .selectAll<SVGGElement, Item>("g.bar-group")
+      .data(data, (d) => d.name)
+      .join(
+        (enter) =>
+          enter
+            .append("g")
+            .attr("class", "bar-group")
+            .attr("transform", (d) => `translate(0, ${yScale(d.name)})`),
+        (update) =>
+          update.attr("transform", (d) => `translate(0, ${yScale(d.name)})`),
+        (exit) => exit.remove(),
+      );
+
+    return barGroups;
+  };
 
   const createYScale = (
     chartHeight: number,
@@ -195,32 +252,35 @@ export default function ModeNumberLines() {
       .range([0, chartHeight - xScaleHeight])
       .paddingInner(0.2);
 
-  const createXScale = (
-    chartWidth: number,
-  ): d3.ScaleLogarithmic<number, number, never> =>
-    d3
-      .scaleLog()
+  const createXScale = (chartWidth: number): void => {
+    xScale.current
       .domain([1, maxCount.current + 1])
       .range([0, chartWidth - stubWidth - numberWidth])
       .nice();
+  };
 
   const getInnerChart = (
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
     marginLeft: number,
     marginTop: number,
-  ): d3.Selection<SVGGElement, unknown, null, undefined> =>
-    svg.append("g").attr("transform", `translate(${marginLeft}, ${marginTop})`);
+  ): d3.Selection<d3.BaseType | SVGGElement, null, SVGSVGElement, unknown> =>
+    svg
+      .selectAll(".inner-chart")
+      .data([null])
+      .join("g")
+      .attr("class", "inner-chart")
+      .attr("transform", `translate(${marginLeft}, ${marginTop})`);
 
-  const initSvg = (chartWidth: number, chartHeight: number) => {
+  const initSvg = (width: number, height: number) => {
+    if (!containerRef.current) return;
     if (svgD3Ref.current) {
-      svgD3Ref.current.selectAll("*").remove();
-      svgD3Ref.current.attr("width", chartWidth).attr("height", chartHeight);
+      svgD3Ref.current.attr("width", width).attr("height", height);
     } else {
       svgD3Ref.current = d3
         .select(containerRef.current)
         .append("svg")
-        .attr("width", chartWidth)
-        .attr("height", chartHeight)
+        .attr("width", width)
+        .attr("height", height)
         .style("display", "block")
         .style("max-width", "100%")
         .style("max-height", "100%")
@@ -263,7 +323,23 @@ export default function ModeNumberLines() {
           position: "relative",
           backgroundColor: "var(--theme-background-color)",
         }}
-      ></div>
+      >
+        {modes.length === 0 && lines.length === 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
+              justifyContent: "center",
+              alignContent: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+      </div>
     </Box>
   );
 }
