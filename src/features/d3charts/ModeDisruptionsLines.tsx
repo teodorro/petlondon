@@ -58,6 +58,12 @@ export default function ModeDisruptionLines() {
     },
   );
 
+  const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
+  const getChartWidth = (): number =>
+    Math.max(0, size.width - chartMargin.left - chartMargin.right);
+  const getChartHeight = (): number =>
+    Math.max(0, size.height - chartMargin.top - chartMargin.bottom);
+
   useEffect(() => {
     setModes(getLineModes.data ?? []);
   }, [getLineModes.data]);
@@ -120,22 +126,18 @@ export default function ModeDisruptionLines() {
   }, [modes, disruptions, lines]);
 
   useEffect(() => {
-    if (!size.width || !size.height) return;
-    const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
-    const chartWidth = size.width - chartMargin.left - chartMargin.right;
-    const chartHeight = size.height - chartMargin.top - chartMargin.bottom;
-    const radius = chartHeight / 2;
-
-    // needed every time because data is asynchronously modified by different queries
+    if (!size.width || !size.height || !data) return;
+    const chartWidth = getChartWidth();
+    const chartHeight = getChartHeight();
+    const radius = chartHeight / 2 - 10;
     initSvg(chartWidth, chartHeight);
 
     if (data == null || svgD3Ref.current == null) return;
 
     const root = partition(data, radius);
-    const svg = svgD3Ref.current;
 
     const innerChart = getInnerChart(
-      svg,
+      svgD3Ref.current,
       chartMargin.left,
       chartMargin.top,
       chartWidth,
@@ -143,90 +145,164 @@ export default function ModeDisruptionLines() {
     );
 
     const label = getLabel(innerChart);
-    const { arc, mousearc } = createArcGenerators(radius);
-    const path = renderSegments(innerChart, root, arc);
-    addInteractionLayers(innerChart, root, mousearc, path, label);
+    const { arc, mousearc } = createArcGenerators(radius, root);
+    renderSegments(innerChart, root, arc);
+    addInteractionLayers(innerChart, root, mousearc, label);
   }, [size, data]);
 
+  const getKey = (d: d3.HierarchyRectangularNode<ModeDisruptionNode>) =>
+    d
+      .ancestors()
+      .map((x) => x.data.name)
+      .join("/");
+
   const addInteractionLayers = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
-    root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
-    mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
-    path: d3.Selection<
-      d3.BaseType | SVGPathElement,
-      d3.HierarchyRectangularNode<ModeDisruptionNode>,
-      SVGGElement,
+    innerChart: d3.Selection<
+      d3.BaseType | SVGGElement,
+      null,
+      SVGSVGElement,
       unknown
     >,
-    label: d3.Selection<SVGTextElement, unknown, null, undefined>,
+    root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
+    mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
+    label: d3.Selection<SVGTextElement, null, SVGSVGElement, unknown>,
   ) => {
-    innerChart
-      .append("g")
-      .attr("fill", "none")
-      .attr("pointer-events", "all")
-      .on("mouseleave", () => {
-        path.attr("fill-opacity", 1);
-        label.style("visibility", "hidden");
-      })
-      .selectAll("path")
-      .data(
-        root.descendants().filter((d) => {
-          return d.depth && d.x1 - d.x0 > 0.001;
-        }),
-      )
-      .join("path")
-      .attr("d", mousearc)
-      .on("mouseenter", (_event, d) => {
-        const sequence = d.ancestors().reverse().slice(1);
-        path.attr("fill-opacity", (node) =>
-          sequence.indexOf(node) >= 0 ? 1.0 : 0.3,
+    const data = root
+      .descendants()
+      .filter((d) => d.depth && d.x1 - d.x0 > 0.001);
+
+    const onMouseLeave = () => {
+      innerChart.selectAll("g.arcs-group path").attr("fill-opacity", 1);
+      label.style("visibility", "hidden");
+    };
+
+    const onMouseEnter = (
+      _event: unknown,
+      d: d3.HierarchyRectangularNode<ModeDisruptionNode>,
+    ) => {
+      const sequence = new Set(d.ancestors().map((n) => n.data.name));
+      innerChart
+        .selectAll<
+          SVGPathElement,
+          d3.HierarchyRectangularNode<ModeDisruptionNode>
+        >("g.arcs-group path")
+        .attr("fill-opacity", (node) =>
+          sequence.has(node.data.name) ? 1.0 : 0.3,
         );
-        label
-          .style("visibility", null)
-          .select(".upper-text")
-          .text(makeKebabReadable(d.data.name));
-        label
-          .style("visibility", null)
-          .select(".lower-text")
-          .text(
-            d.data == null || d.data.info == null ? "" : d.data.info.toString(),
-          );
-      });
+      label
+        .style("visibility", null)
+        .select(".upper-text")
+        .text(makeKebabReadable(d.data.name));
+      label
+        .style("visibility", null)
+        .select(".lower-text")
+        .text(
+          d.data == null || d.data.info == null ? "" : d.data.info.toString(),
+        );
+    };
+
+    const mouseArcsGroup = innerChart
+      .selectAll<SVGGElement, null>("g.mouse-arcs-group")
+      .data([null])
+      .join(
+        (enter) =>
+          enter
+            .append("g")
+            .attr("class", "mouse-arcs-group")
+            .attr("fill", "none")
+            .attr("pointer-events", "all")
+            .on("mouseleave", onMouseLeave),
+        (update) => update,
+        (exit) => exit.remove(),
+      );
+
+    mouseArcsGroup
+      .selectAll<
+        SVGPathElement,
+        d3.HierarchyRectangularNode<ModeDisruptionNode>
+      >("path")
+      .data(data, getKey)
+      .join(
+        (enter) =>
+          enter
+            .append("path")
+            .attr("d", mousearc)
+            .on("mouseenter", onMouseEnter),
+        (update) => update.attr("d", mousearc),
+        (exit) => exit.remove(),
+      );
   };
 
   const renderSegments = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
+    innerChart: d3.Selection<
+      d3.BaseType | SVGGElement,
+      null,
+      SVGSVGElement,
+      unknown
+    >,
     root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
     arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
-  ) => {
-    return innerChart
-      .append("g")
-      .selectAll("path")
-      .data(
-        root.descendants().filter((d) => {
-          return d.depth && d.x1 - d.x0 > 0.001;
-        }),
-      )
-      .join("path")
-      .attr(
-        "fill",
-        (d) => lineColors[(d.data as ModeDisruptionNode).name as LineModeName],
-      )
-      .attr("d", arc);
+  ): d3.Selection<
+    SVGPathElement,
+    d3.HierarchyRectangularNode<ModeDisruptionNode>,
+    SVGGElement,
+    null
+  > => {
+    const data = root
+      .descendants()
+      .filter((d) => d.depth && d.x1 - d.x0 > 0.001);
+
+    const arcsGroup = innerChart
+      .selectAll<SVGGElement, null>("g.arcs-group")
+      .data([null])
+      .join(
+        (enter) => enter.append("g").attr("class", "arcs-group"),
+        (update) => update,
+        (exit) => exit.remove(),
+      );
+
+    const paths = arcsGroup
+      .selectAll<
+        SVGPathElement,
+        d3.HierarchyRectangularNode<ModeDisruptionNode>
+      >("path")
+      .data(data, getKey)
+      .join(
+        (enter) =>
+          enter
+            .append("path")
+            .attr(
+              "fill",
+              (d) =>
+                lineColors[(d.data as ModeDisruptionNode).name as LineModeName],
+            )
+            .attr("d", arc),
+        (update) => update.transition().duration(500).attr("d", arc),
+        (exit) => exit.remove(),
+      );
+
+    return paths;
   };
 
   const createArcGenerators = (
-    radius: number,
+    fallbackRadius: number,
+    root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
   ): {
     arc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
     mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>;
   } => {
+    const maxY1 =
+      d3.max(root.descendants(), (d) => d.y1) ??
+      fallbackRadius * fallbackRadius;
+    const realRadius = Math.sqrt(maxY1);
+    console.log(realRadius, "realRadius");
+
     const arc = d3
       .arc<d3.HierarchyRectangularNode<ModeDisruptionNode>>()
       .startAngle((d) => d.x0)
       .endAngle((d) => d.x1)
-      .padAngle(1 / radius)
-      .padRadius(radius)
+      .padAngle(1 / realRadius)
+      .padRadius(realRadius)
       .innerRadius((d) => Math.sqrt(d.y0))
       .outerRadius((d) => Math.sqrt(d.y1) - 1);
 
@@ -235,22 +311,32 @@ export default function ModeDisruptionLines() {
       .startAngle((d) => d.x0)
       .endAngle((d) => d.x1)
       .innerRadius((d) => Math.sqrt(d.y0))
-      .outerRadius(radius);
+      .outerRadius((d) => Math.sqrt(d.y1));
 
     return { arc, mousearc };
   };
 
   const getLabel = (
-    innerChart: d3.Selection<SVGGElement, unknown, null, undefined>,
+    innerChart: d3.Selection<
+      d3.BaseType | SVGGElement,
+      null,
+      SVGSVGElement,
+      unknown
+    >,
   ) => {
     const label = innerChart
-      .append("text")
+      .selectAll("text.chart-label")
+      .data([null])
+      .join("text")
+      .attr("class", "chart-label")
       .attr("text-anchor", "middle")
       .attr("fill", "#888")
       .style("visibility", "hidden");
 
     label
-      .append("tspan")
+      .selectAll("text.upper-text")
+      .data([null])
+      .join("tspan")
       .attr("class", "upper-text")
       .attr("x", 0)
       .attr("y", 0)
@@ -259,7 +345,9 @@ export default function ModeDisruptionLines() {
       .text("");
 
     label
-      .append("tspan")
+      .selectAll("text.lower-text")
+      .data([null])
+      .join("tspan")
       .attr("class", "lower-text")
       .attr("x", 0)
       .attr("y", 0)
@@ -276,22 +364,25 @@ export default function ModeDisruptionLines() {
     marginTop: number,
     width: number,
     height: number,
-  ): d3.Selection<SVGGElement, unknown, null, undefined> =>
+  ): d3.Selection<d3.BaseType | SVGGElement, null, SVGSVGElement, unknown> =>
     svg
-      .append("g")
+      .selectAll(".inner-chart")
+      .data([null])
+      .join("g")
+      .attr("class", "inner-chart")
       .attr("transform", `translate(${marginLeft}, ${marginTop})`)
-      .attr("transform", `translate(${width / 2}, ${height / 2 + 20})`);
+      .attr("transform", `translate(${width / 2}, ${height / 2 + 10})`);
 
-  const initSvg = (chartWidth: number, chartHeight: number) => {
+  const initSvg = (width: number, height: number) => {
+    if (!containerRef.current) return;
     if (svgD3Ref.current) {
-      svgD3Ref.current.selectAll("*").remove();
-      svgD3Ref.current.attr("width", chartWidth).attr("height", chartHeight);
+      svgD3Ref.current.attr("width", width).attr("height", height);
     } else {
       svgD3Ref.current = d3
         .select(containerRef.current)
         .append("svg")
-        .attr("width", chartWidth)
-        .attr("height", chartHeight)
+        .attr("width", width)
+        .attr("height", height)
         .style("display", "block")
         .style("max-width", "100%")
         .style("max-height", "100%")

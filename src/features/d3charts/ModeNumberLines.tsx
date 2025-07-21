@@ -82,8 +82,6 @@ export default function ModeNumberLines() {
     initSvg(chartWidth, chartHeight);
     if (svgD3Ref.current == null) return;
 
-    console.log(`modes: ${modes.length}, lines: ${lines.length}`);
-
     const data = getPreparedData();
     const innerChart = getInnerChart(
       svgD3Ref.current,
