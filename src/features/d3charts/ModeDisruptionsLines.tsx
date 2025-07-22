@@ -165,7 +165,12 @@ export default function ModeDisruptionLines() {
     >,
     root: d3.HierarchyRectangularNode<ModeDisruptionNode>,
     mousearc: d3.Arc<unknown, d3.HierarchyRectangularNode<ModeDisruptionNode>>,
-    label: d3.Selection<SVGTextElement, null, SVGSVGElement, unknown>,
+    label: d3.Selection<
+      d3.BaseType | SVGTextElement,
+      null,
+      d3.BaseType | SVGGElement,
+      null
+    >,
   ) => {
     const data = root
       .descendants()
@@ -323,7 +328,12 @@ export default function ModeDisruptionLines() {
       SVGSVGElement,
       unknown
     >,
-  ) => {
+  ): d3.Selection<
+    d3.BaseType | SVGTextElement,
+    null,
+    d3.BaseType | SVGGElement,
+    null
+  > => {
     const label = innerChart
       .selectAll("text.chart-label")
       .data([null])
