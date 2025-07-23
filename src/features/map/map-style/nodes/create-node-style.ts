@@ -33,14 +33,9 @@ export const createNodeStyle = (
 };
 
 const createImage = (feature: Feature, resolution: number): ImageStyle => {
-  const a = feature.getProperties().properties;
-  console.log(a);
-  if (a.lineColor == null) {
-    console.log(a);
-  }
   const img = getNodeCircle(
     resolution,
-    feature.getProperties().properties.lineColor,
+    feature.getProperties().properties?.lineColor,
   );
   img?.setScale(getIconScale(resolution));
   return img;

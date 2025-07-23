@@ -18,7 +18,11 @@ describe("createNodeStyle", () => {
   });
 
   it("Creates node style at large scale", () => {
-    const feature = new Feature({ type: "Point", geometry: new Point([1, 2]) });
+    const feature = new Feature({
+      type: "Point",
+      geometry: new Point([1, 2]),
+      properties: { lineColor: "#000" },
+    });
     const resolution = NODE_RESOLUTION_BREAKPOINT - 1;
 
     const style = createNodeStyle(feature, resolution);
