@@ -15,9 +15,14 @@ export const NODE_FONT_RESOLUTION_BREAKPOINT = 6;
 export const SELECTED_COLOR = "#cc00cc";
 export const DEFAULT_COLOR = "#4444CC";
 
-export const selectedNodeFill = new Fill({ color: `${SELECTED_COLOR}aa` });
-export const defaultNodeFill = new Fill({ color: `${DEFAULT_COLOR}88` });
-
+export const addTransparencyToFillColor = (color: string): string =>
+  `${color}88`;
+export const selectedNodeFill = new Fill({
+  color: addTransparencyToFillColor(SELECTED_COLOR),
+});
+export const defaultNodeFill = new Fill({
+  color: addTransparencyToFillColor(DEFAULT_COLOR),
+});
 export const selectedNodeStroke = new Stroke({
   color: SELECTED_COLOR,
   width: 0.5,
@@ -45,11 +50,14 @@ export const getNodeIcon = (feature: Feature): Icon => {
   return img;
 };
 
-export const getNodeCircle = (resolution: number): ImageStyle => {
+export const getNodeCircle = (
+  resolution: number,
+  color: string,
+): ImageStyle => {
   const img = new Circle({
-    fill: defaultNodeFill,
+    fill: new Fill({ color: addTransparencyToFillColor(color) }),
     stroke: getDefaultNodeStroke(resolution),
-    radius: 10,
+    radius: 8,
   });
   return img;
 };

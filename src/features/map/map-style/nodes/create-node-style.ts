@@ -1,12 +1,11 @@
 import { Feature } from "ol";
-import { Circle, Style } from "ol/style";
+import { Style } from "ol/style";
 import { Point } from "ol/geom";
 import {
   createText,
   getIconScale,
-  getSelectedNodeStroke,
+  getNodeCircle,
   NODE_RESOLUTION_BREAKPOINT,
-  selectedNodeFill,
 } from "./node-utils";
 import ImageStyle from "ol/style/Image";
 
@@ -14,7 +13,7 @@ export const createNodeStyle = (
   feature: Feature,
   resolution: number,
 ): Style => {
-  const image = createImage(resolution);
+  const image = createImage(feature, resolution);
   const geometry = createGeometry(feature);
   let style: Style;
   if (resolution <= NODE_RESOLUTION_BREAKPOINT) {
@@ -33,20 +32,22 @@ export const createNodeStyle = (
   return style;
 };
 
-const createImage = (resolution: number): ImageStyle => {
-  const img = new Circle({
-    fill: selectedNodeFill,
-    stroke: getSelectedNodeStroke(resolution),
-    radius: 8,
-  });
+const createImage = (feature: Feature, resolution: number): ImageStyle => {
+  const a = feature.getProperties().properties;
+  console.log(a);
+  if (a.lineColor == null) {
+    console.log(a);
+  }
+  const img = getNodeCircle(
+    resolution,
+    feature.getProperties().properties.lineColor,
+  );
   img?.setScale(getIconScale(resolution));
   return img;
 };
 
 const createGeometry = (feature: Feature): Point => {
   const geometry = feature.getGeometry() as Point;
-  console.log("geometry instanceof Point", geometry instanceof Point);
-  console.log("geometry", geometry);
   const coords = geometry.getCoordinates();
   return coords != null ? new Point(coords) : new Point([]);
 };
