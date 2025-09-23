@@ -1,45 +1,75 @@
 import { Layer } from "ol/layer";
 import { DtoRouteSequence } from "../../../types/lines/dto-route-sequence";
-// import { createLineFeature } from "../create-feature/create-line-feature";
 import VectorSource from "ol/source/Vector";
 import { createPointFeature } from "../create-feature/create-point-feature";
+import { DtoStation } from "../../../types/lines/dto-station";
+import { createSmoothLineFeature } from "../create-feature/create-line-feature";
 
-// export function loadLinesToSchema(
-//   layer: Layer,
-//   routeSequence: DtoRouteSequence,
-// ): void {
-//   // (layer.getSource() as VectorSource).clear();
-//   if (routeSequence == null) return;
-//   routeSequence.stopPointSequences.forEach((sequence) => {
-//     // export function createLineFeature(
-//     //   stopPointSequence: DtoStopPointSequence,
-//     // ): Feature | undefined {
-//     //   if (stopPointSequence == null || stopPointSequence.stopPoint.length <= 1) {
-//     //     return undefined;
-//     //   }
-//     const feature = createLineFeature(sequence);
-//     // console.log(feature?.getGeometry());
-//     if (feature != null)
-//       (layer.getSource() as VectorSource).addFeature(feature);
-//   });
-// }
-
-export function loadLinesToSchema(
+export const loadLinesToSchema = (
   layer: Layer,
   routeSequence: DtoRouteSequence,
-): void {
+): void => {
   if (routeSequence == null) return;
   console.log("routeSequence", routeSequence.lineName);
   routeSequence.stopPointSequences.forEach((sequence) => {
     sequence.stopPoint.forEach((stopPoint) => {
-      const feature = createPointFeature({
-        lat: stopPoint.lat,
-        lon: stopPoint.lon,
-        commonName: stopPoint.name,
-        lineName: routeSequence.lineName,
-      });
-      if (feature != null)
-        (layer.getSource() as VectorSource).addFeature(feature);
+      addStopPoint(
+        layer.getSource() as VectorSource,
+        routeSequence.lineName,
+        stopPoint,
+      );
     });
+    addLine(
+      layer.getSource() as VectorSource,
+      routeSequence.lineName,
+      sequence.stopPoint,
+    );
   });
-}
+};
+
+const addStopPoint = (
+  layerSource: VectorSource,
+  lineName: string,
+  stopPoint: DtoStation,
+) => {
+  const feature = createPointFeature({
+    lat: stopPoint.lat,
+    lon: stopPoint.lon,
+    commonName: stopPoint.name,
+    lineName,
+  });
+  console.log(
+    "latlon",
+    (feature.getGeometry() as SimpleGeometry).getCoordinates(),
+  );
+  if (feature != null) layerSource.addFeature(feature);
+};
+
+// const addLine = (
+//   layerSource: VectorSource,
+//   lineName: string,
+//   stopPoints: DtoStation[],
+// ) => {
+//   const dataPoints: [number, number][] = stopPoints.map(
+//     (sp) => fromLonLat([sp.lon, sp.lat]) as [number, number],
+//   );
+//   lineGen(dataPoints);
+//   const feature = createLineFeature(lineName, dataPoints);
+//   console.log(
+//     "geometry",
+//     (feature.getGeometry() as SimpleGeometry).getCoordinates(),
+//   );
+//   if (feature != null) layerSource.addFeature(feature);
+// };
+
+const addLine = (
+  layerSource: VectorSource,
+  lineName: string,
+  stopPoints: DtoStation[],
+) => {
+  const feature = createSmoothLineFeature(
+    lineName,
+    stopPoints.map((sp) => [sp.lon, sp.lat] as [number, number]),
+  );
+  if (feature != null) layerSource.addFeature(feature);
+};

@@ -1,20 +1,18 @@
 import { Feature } from "ol";
 import { FeatureLike } from "ol/Feature";
 import { nodeStylesCache } from "./nodes/node-styles-cache";
-
-// const edgeStyles = new Map<Feature, any>();
+import { edgeStylesCache } from "./edges/edge-styles-cache";
 
 export const getSchemaStyle = (
   ff: FeatureLike,
   resolution: number,
   selected: boolean = false,
 ) => {
-  // console.log(resolution);
   const feature = ff as Feature;
   if (isNode(feature)) {
     return nodeStylesCache.getNodeStyle(feature, resolution, { selected });
   } else if (isEdge(feature)) {
-    return []; //getEdgeStyle(feature, resolution);
+    return edgeStylesCache.getEdgeStyle(feature, resolution, { selected });
   }
   return [];
 };
