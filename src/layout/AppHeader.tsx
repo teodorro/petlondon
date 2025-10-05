@@ -9,9 +9,11 @@ import { createSelectors } from "../utils/create-selectors";
 export default function AppHeader() {
   const drawerStoreSelectors = createSelectors(useDrawerStore);
   const toggleDrawer = drawerStoreSelectors.use.toggle();
+
   const themeStoreSelectors = createSelectors(useThemeStore);
   const themeMode = themeStoreSelectors.use.mode();
   const themeToggleMode = themeStoreSelectors.use.toggleMode();
+
   return (
     <>
       <AppBar

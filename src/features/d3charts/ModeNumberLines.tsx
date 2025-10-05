@@ -9,6 +9,7 @@ import { createSelectors } from "../../utils/create-selectors";
 import { Box, CircularProgress } from "@mui/material";
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { makeKebabReadable } from "../../utils/text-utils";
+import { useShowQueryError } from "../../utils/show-error";
 
 type Item = {
   name: string;
@@ -40,8 +41,8 @@ export default function ModeNumberLines() {
     d3.scaleLog().domain([1, 10]).range([0, 100]),
   );
 
-  const getLineModes = useLineModesQuery();
-  const getAllValidLines = useValidLinesQuery();
+  const getLineModesQuery = useLineModesQuery();
+  const getAllValidLinesQuery = useValidLinesQuery();
 
   const getChartWidth = (): number =>
     Math.max(0, size.width - chartMargin.left - chartMargin.right);
@@ -49,12 +50,21 @@ export default function ModeNumberLines() {
     Math.max(0, size.height - chartMargin.top - chartMargin.bottom);
 
   useEffect(() => {
-    setModes(getLineModes.data ?? []);
-  }, [getLineModes.data]);
+    setModes(getLineModesQuery.data ?? []);
+  }, [getLineModesQuery.data]);
 
   useEffect(() => {
-    setLines(getAllValidLines.data ?? []);
-  }, [getAllValidLines.data]);
+    setLines(getAllValidLinesQuery.data ?? []);
+  }, [getAllValidLinesQuery.data]);
+
+  useShowQueryError(
+    getAllValidLinesQuery,
+    (msg) => `Error requesting all valid lines\n${msg}`,
+  );
+  useShowQueryError(
+    getLineModesQuery,
+    (msg) => `Error requesting line modes\n${msg}`,
+  );
 
   useEffect(() => {
     calcNumberOfLines();

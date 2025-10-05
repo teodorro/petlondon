@@ -9,8 +9,7 @@ export const loadLinesToSchema = (
   layer: Layer,
   routeSequence: DtoRouteSequence,
 ): void => {
-  if (routeSequence == null) return;
-  console.log("routeSequence", routeSequence.lineName);
+  if (routeSequence == null || routeSequence.stopPointSequences == null) return;
   routeSequence.stopPointSequences.forEach((sequence) => {
     sequence.stopPoint.forEach((stopPoint) => {
       addStopPoint(
@@ -38,10 +37,6 @@ const addStopPoint = (
     commonName: stopPoint.name,
     lineName,
   });
-  console.log(
-    "latlon",
-    (feature.getGeometry() as SimpleGeometry).getCoordinates(),
-  );
   if (feature != null) layerSource.addFeature(feature);
 };
 

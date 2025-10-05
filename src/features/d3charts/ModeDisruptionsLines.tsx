@@ -11,6 +11,7 @@ import {
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { DtoDisruption } from "../../types/lines/dto-disruption";
 import { makeKebabReadable } from "../../utils/text-utils";
+import { useShowQueriesError, useShowQueryError } from "../../utils/show-error";
 
 interface ModeDisruptionNode {
   name: string;
@@ -44,8 +45,8 @@ export default function ModeDisruptionLines() {
   const addDisruption = selectors.use.addDisruption();
 
   const getLineModes = useLineModesQuery({ enabled: false });
-  const getAllValidLines = useValidLinesQuery();
-  const getLineDisruptions = useLineDisruptionsQueries(
+  const getAllValidLinesQuery = useValidLinesQuery();
+  const getLineDisruptionsQueries = useLineDisruptionsQueries(
     modes == null || lines == null
       ? []
       : modes
@@ -69,20 +70,20 @@ export default function ModeDisruptionLines() {
   }, [getLineModes.data]);
 
   useEffect(() => {
-    setLines(getAllValidLines.data ?? []);
-  }, [getAllValidLines.data]);
+    setLines(getAllValidLinesQuery.data ?? []);
+  }, [getAllValidLinesQuery.data]);
 
   useEffect(() => {
     calcNumberOfLines();
-    getLineDisruptions.forEach((query) => query.refetch());
+    getLineDisruptionsQueries.forEach((query) => query.refetch());
   }, [modes, lines]);
 
   useEffect(() => {
-    const allDataReady = getLineDisruptions.every((query) => query.data);
+    const allDataReady = getLineDisruptionsQueries.every((query) => query.data);
 
     if (!allDataReady) return;
 
-    getLineDisruptions.forEach((query, index) => {
+    getLineDisruptionsQueries.forEach((query, index) => {
       const disruptionData = query.data;
       const mode = modes[index];
       if (disruptionData) {
@@ -91,10 +92,19 @@ export default function ModeDisruptionLines() {
     });
   }, [
     // to make it run after receiving all disruptions
-    getLineDisruptions
+    getLineDisruptionsQueries
       .map((q) => ((q.data as DtoDisruption[]) || null)?.length)
       .join("-"),
   ]);
+
+  useShowQueriesError(
+    getLineDisruptionsQueries,
+    (msg) => `Error requesting line disruptions\n${msg}`,
+  );
+  useShowQueryError(
+    getAllValidLinesQuery,
+    (msg) => `Error requesting all valid lines\n${msg}`,
+  );
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {

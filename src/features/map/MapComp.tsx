@@ -17,6 +17,11 @@ import { getLinesLayer } from "./get-layer/get-lines-layer";
 import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
 import { loadLinesToSchema } from "./load-objects-to-schema/load-lines-to-schema";
 import VectorSource from "ol/source/Vector";
+import {
+  showError,
+  useShowQueriesError,
+  useShowQueryError,
+} from "../../utils/show-error";
 
 export default function MapComp() {
   const tileLayer = useRef<Layer>(null);
@@ -31,7 +36,7 @@ export default function MapComp() {
   const setLines = lineSelectors.use.setLines();
   const setRouteSequences = lineSelectors.use.setRouteSequences();
 
-  const getAllValidLines = useValidLinesQuery();
+  const getAllValidLinesQuery = useValidLinesQuery();
   const getTubeRoutesQueries = useTubeRoutesQueries(
     lines == null || lines.length === 0
       ? []
@@ -41,9 +46,18 @@ export default function MapComp() {
     },
   );
 
+  useShowQueriesError(
+    getTubeRoutesQueries,
+    (msg) => `Error requesting tube routes\n${msg}`,
+  );
+  useShowQueryError(
+    getAllValidLinesQuery,
+    (msg) => `Error requesting all valid lines\n${msg}`,
+  );
+
   useEffect(() => {
-    setLines(getAllValidLines.data ?? []);
-  }, [getAllValidLines.data]);
+    setLines(getAllValidLinesQuery.data ?? []);
+  }, [getAllValidLinesQuery.data]);
 
   useEffect(() => {
     getTubeRoutesQueries.forEach((query) => query.refetch());
@@ -68,22 +82,30 @@ export default function MapComp() {
   ]);
 
   useEffect(() => {
+    loadRouteSequencesToSchema();
+  }, [routeSequences]);
+
+  useEffect(() => {
+    showError("asd");
+    const view = getView();
+    tileLayer.current = getTileLayer(themeMode);
+    linesLayer.current = getLinesLayer();
+    const map = getMap(view, [tileLayer.current, linesLayer.current]);
+    if (routeSequences != null && routeSequences.length !== 0) {
+      loadRouteSequencesToSchema();
+    }
+    return () => {
+      map.setTarget(undefined);
+    };
+  }, [themeMode]);
+
+  const loadRouteSequencesToSchema = () => {
     if (linesLayer.current == null) return;
     (linesLayer.current.getSource() as VectorSource).clear();
     routeSequences.forEach((routeSequence) =>
       loadLinesToSchema(linesLayer.current!, routeSequence),
     );
-  }, [routeSequences]);
-
-  useEffect(() => {
-    const view = getView();
-    tileLayer.current = getTileLayer(themeMode);
-    linesLayer.current = getLinesLayer();
-    const map = getMap(view, [tileLayer.current, linesLayer.current]);
-    return () => {
-      map.setTarget(undefined);
-    };
-  }, [themeMode]);
+  };
 
   return <Box id="map" sx={{ width: 1, height: 1 }}></Box>;
 }
@@ -92,7 +114,7 @@ const getView = (): View => {
   return new View({
     center: fromLonLat([-0.12, 51.51]),
     zoom: 10,
-    // extent: [-202513.341856, 6561017.966314, 186327.095083, 6856950.728974],
+    extent: [-202513.341856, 6561017.966314, 186327.095083, 6856950.728974],
   });
 };
 

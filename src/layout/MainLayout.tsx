@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { useDrawerStore } from "../stores/drawer-store";
 import Sidebar from "../features/sidebar";
 import AppHeader from "./AppHeader";
+import ErrorAlert from "../features/ErrorAlert";
 
 const drawerWidth = 200;
 
@@ -10,7 +11,15 @@ export const MainLayout = () => {
   const open = useDrawerStore((s) => s.open);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <AppHeader />
       <Toolbar sx={{ border: "2px solid #0a0", height: "64px" }} />
       <Box sx={{ display: "flex", flex: 1, width: "100vw" }}>
@@ -31,6 +40,7 @@ export const MainLayout = () => {
           <Outlet />
         </Box>
       </Box>
+      <ErrorAlert></ErrorAlert>
     </Box>
   );
 };

@@ -4,7 +4,7 @@ import { fromLonLat } from "ol/proj";
 import * as d3 from "d3";
 import { tubeLineColors } from "../../../utils/line-colors";
 
-const SEGMENTS_NUMBER = 30;
+export const SEGMENTS_NUMBER = 30;
 
 export const createLineFeatureLogLat = (
   name: string,
