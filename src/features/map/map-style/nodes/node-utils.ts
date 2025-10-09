@@ -20,14 +20,14 @@ export const addTransparencyToColor = (
   transparency: string = "aa",
 ): string => `${color}${transparency}`;
 export const selectedNodeFill = new Fill({
-  color: addTransparencyToColor(SELECTED_COLOR),
+  color: SELECTED_COLOR,
 });
 export const defaultNodeFill = new Fill({
   color: addTransparencyToColor(DEFAULT_COLOR),
 });
 export const selectedNodeStroke = new Stroke({
   color: SELECTED_COLOR,
-  width: 0.5,
+  width: 1.5,
 });
 export const defaultNodeStroke = new Stroke({
   color: DEFAULT_COLOR,
@@ -60,7 +60,7 @@ export const getNodeCircle = (
   const img = new Circle({
     fill: new Fill({ color: transColor }),
     stroke: getDefaultNodeStroke(resolution, transColor),
-    radius: 40 / resolution + 4,
+    radius: (3 * NODE_WIDTH) / resolution + 4,
   });
   return img;
 };
@@ -86,15 +86,15 @@ export const getTextOffsetY = (resolution: number): number => {
 };
 
 export const getSelectedStrokeWidth = (resolution: number): number => {
-  return 4 / resolution;
+  return NODE_WIDTH / resolution + 3;
 };
 
-export const getDefaultStrokeWidth = (resolution: number): number => {
-  return 4 / resolution;
+export const getDefaultStrokeWidth = (): number => {
+  return 0;
 };
 
 export const getSelectedNodeRadius = (resolution: number): number => {
-  return NODE_WIDTH / (1 * resolution);
+  return (5 * NODE_WIDTH) / resolution + 5;
 };
 
 export const getNodeCoordinates = (nodeFeature: Feature): number[] => {
@@ -104,7 +104,7 @@ export const getNodeCoordinates = (nodeFeature: Feature): number[] => {
 export const getSelectedCircleStyle = (resolution: number): Style => {
   const style = new Style({
     image: new Circle({
-      fill: selectedNodeFill,
+      fill: defaultNodeFill,
       stroke: getSelectedNodeStroke(resolution),
       radius: getSelectedNodeRadius(resolution),
     }),
@@ -128,7 +128,7 @@ export const getDefaultNodeStroke = (
 };
 
 export const getName = (feature: Feature): string => {
-  return feature.getProperties()["name"];
+  return feature.getProperties().name;
 };
 
 export const createText = (feature: Feature, resolution: number): Text => {
@@ -156,6 +156,5 @@ export const createImage = (
     resolution,
     feature.getProperties().properties?.lineColor,
   );
-  // img?.setScale(getIconScale(resolution));
   return img;
 };
