@@ -14,3 +14,8 @@ export const getStrokeWidth = (
 export const getEdgeCoordinates = (edge: Feature): number[] => {
   return [...(edge.getGeometry() as LineString).getFlatCoordinates()];
 };
+
+export const addTransparencyToColor = (
+  color: string,
+  transparency: string = "aa",
+): string => `${color}${transparency}`;

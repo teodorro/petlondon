@@ -1,5 +1,5 @@
 import { Stroke, Style } from "ol/style";
-import { getStrokeWidth } from "./edge-utils";
+import { addTransparencyToColor, getStrokeWidth } from "./edge-utils";
 import { Feature } from "ol";
 import { LineString } from "ol/geom";
 
@@ -18,7 +18,7 @@ export const updateEdgeStyle = (
       getStroke(
         oldStyles[0],
         resolution,
-        feature.getProperties().properties?.lineColor,
+        addTransparencyToColor(feature.getProperties().properties?.lineColor),
       ),
     );
     return styles;

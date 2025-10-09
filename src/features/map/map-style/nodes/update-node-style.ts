@@ -2,14 +2,13 @@ import { Feature } from "ol";
 import { SimpleGeometry } from "ol/geom";
 import { Style, Text } from "ol/style";
 import {
+  createImage,
   createText,
   getFont,
-  getIconScale,
   getName,
   getTextOffsetY,
   NODE_RESOLUTION_BREAKPOINT,
 } from "./node-utils";
-import ImageStyle from "ol/style/Image";
 
 export const updateNodeStyle = (
   feature: Feature,
@@ -31,7 +30,7 @@ export const updateNodeStyle = (
     return oldStyle;
   }
   if (resolution !== oldResolution || getName(feature) !== oldName) {
-    const image = getImage(oldStyle, resolution);
+    const image = createImage(feature, resolution);
     const geometry = getGeometry(feature, oldStyle);
     let style: Style;
     if (resolution <= NODE_RESOLUTION_BREAKPOINT) {
@@ -65,17 +64,6 @@ const getGeometry = (feature: Feature, oldStyle: Style): SimpleGeometry => {
   const coords = geometry.getCoordinates();
   oldGeometry.setCoordinates(coords ?? []);
   return geometry;
-};
-
-const getImage = (
-  oldStyle: Style,
-  resolution: number,
-): ImageStyle | undefined => {
-  const img = oldStyle.getImage();
-  if (resolution > NODE_RESOLUTION_BREAKPOINT) {
-    img?.setScale(getIconScale(resolution));
-  }
-  return img ?? undefined;
 };
 
 const getText = (

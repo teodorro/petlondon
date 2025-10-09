@@ -1,6 +1,6 @@
 import { Feature } from "ol";
 import { Stroke, Style } from "ol/style";
-import { getStrokeWidth } from "./edge-utils";
+import { addTransparencyToColor, getStrokeWidth } from "./edge-utils";
 import { SELECTED_COLOR } from "../nodes/node-utils";
 
 export const createEdgeStyle = (
@@ -28,7 +28,7 @@ const createStroke = (
   return new Stroke({
     color: selected
       ? SELECTED_COLOR
-      : feature.getProperties().properties?.lineColor,
+      : addTransparencyToColor(feature.getProperties().properties?.lineColor),
     width: getStrokeWidth(resolution, { selected }),
   });
 };

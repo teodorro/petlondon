@@ -15,13 +15,15 @@ export const NODE_FONT_RESOLUTION_BREAKPOINT = 6;
 export const SELECTED_COLOR = "#cc00cc";
 export const DEFAULT_COLOR = "#4444CC";
 
-export const addTransparencyToFillColor = (color: string): string =>
-  `${color}88`;
+export const addTransparencyToColor = (
+  color: string,
+  transparency: string = "aa",
+): string => `${color}${transparency}`;
 export const selectedNodeFill = new Fill({
-  color: addTransparencyToFillColor(SELECTED_COLOR),
+  color: addTransparencyToColor(SELECTED_COLOR),
 });
 export const defaultNodeFill = new Fill({
-  color: addTransparencyToFillColor(DEFAULT_COLOR),
+  color: addTransparencyToColor(DEFAULT_COLOR),
 });
 export const selectedNodeStroke = new Stroke({
   color: SELECTED_COLOR,
@@ -54,10 +56,11 @@ export const getNodeCircle = (
   resolution: number,
   color: string,
 ): ImageStyle => {
+  const transColor = addTransparencyToColor(color);
   const img = new Circle({
-    fill: new Fill({ color: addTransparencyToFillColor(color) }),
-    stroke: getDefaultNodeStroke(resolution),
-    radius: 8,
+    fill: new Fill({ color: transColor }),
+    stroke: getDefaultNodeStroke(resolution, transColor),
+    radius: 40 / resolution + 4,
   });
   return img;
 };
@@ -115,9 +118,12 @@ export const getSelectedNodeStroke = (resolution: number): Stroke => {
   return selectedNodeStroke;
 };
 
-export const getDefaultNodeStroke = (resolution: number): Stroke => {
+export const getDefaultNodeStroke = (
+  resolution: number,
+  color: string,
+): Stroke => {
   defaultNodeStroke.setWidth(getDefaultStrokeWidth(resolution));
-  defaultNodeStroke.setColor(SELECTED_COLOR);
+  defaultNodeStroke.setColor(color);
   return defaultNodeStroke;
 };
 
@@ -140,4 +146,16 @@ export const createText = (feature: Feature, resolution: number): Text => {
     rotation: 0,
   });
   return text;
+};
+
+export const createImage = (
+  feature: Feature,
+  resolution: number,
+): ImageStyle => {
+  const img = getNodeCircle(
+    resolution,
+    feature.getProperties().properties?.lineColor,
+  );
+  // img?.setScale(getIconScale(resolution));
+  return img;
 };

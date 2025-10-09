@@ -2,12 +2,10 @@ import { Feature } from "ol";
 import { Style } from "ol/style";
 import { Point } from "ol/geom";
 import {
+  createImage,
   createText,
-  getIconScale,
-  getNodeCircle,
   NODE_RESOLUTION_BREAKPOINT,
 } from "./node-utils";
-import ImageStyle from "ol/style/Image";
 
 export const createNodeStyle = (
   feature: Feature,
@@ -30,15 +28,6 @@ export const createNodeStyle = (
     });
   }
   return style;
-};
-
-const createImage = (feature: Feature, resolution: number): ImageStyle => {
-  const img = getNodeCircle(
-    resolution,
-    feature.getProperties().properties?.lineColor,
-  );
-  img?.setScale(getIconScale(resolution));
-  return img;
 };
 
 const createGeometry = (feature: Feature): Point => {

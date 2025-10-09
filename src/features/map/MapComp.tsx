@@ -17,11 +17,7 @@ import { getLinesLayer } from "./get-layer/get-lines-layer";
 import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
 import { loadLinesToSchema } from "./load-objects-to-schema/load-lines-to-schema";
 import VectorSource from "ol/source/Vector";
-import {
-  showError,
-  useShowQueriesError,
-  useShowQueryError,
-} from "../../utils/show-error";
+import { useShowQueriesError, useShowQueryError } from "../../utils/show-error";
 
 export default function MapComp() {
   const tileLayer = useRef<Layer>(null);
@@ -86,7 +82,6 @@ export default function MapComp() {
   }, [routeSequences]);
 
   useEffect(() => {
-    showError("asd");
     const view = getView();
     tileLayer.current = getTileLayer(themeMode);
     linesLayer.current = getLinesLayer();
