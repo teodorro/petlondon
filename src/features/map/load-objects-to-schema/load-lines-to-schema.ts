@@ -40,23 +40,6 @@ const addStopPoint = (
   if (feature != null) layerSource.addFeature(feature);
 };
 
-// const addLine = (
-//   layerSource: VectorSource,
-//   lineName: string,
-//   stopPoints: DtoStation[],
-// ) => {
-//   const dataPoints: [number, number][] = stopPoints.map(
-//     (sp) => fromLonLat([sp.lon, sp.lat]) as [number, number],
-//   );
-//   lineGen(dataPoints);
-//   const feature = createLineFeature(lineName, dataPoints);
-//   console.log(
-//     "geometry",
-//     (feature.getGeometry() as SimpleGeometry).getCoordinates(),
-//   );
-//   if (feature != null) layerSource.addFeature(feature);
-// };
-
 const addLine = (
   layerSource: VectorSource,
   lineName: string,

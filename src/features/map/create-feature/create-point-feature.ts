@@ -7,7 +7,7 @@ export function createPointFeature(node: {
   lat: number;
   lon: number;
   commonName: string;
-  lineName: string;
+  lineName?: string | undefined;
 }): Feature {
   const coords = fromLonLat([node.lon, node.lat]);
   const geometry = new Point(coords);
@@ -16,7 +16,8 @@ export function createPointFeature(node: {
     geometry,
     properties: {
       lineName: node.lineName,
-      lineColor: tubeLineColors[node.lineName],
+      lineColor:
+        node.lineName == null ? "#ffffff00" : tubeLineColors[node.lineName],
     },
   });
   return feature;
