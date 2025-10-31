@@ -59,7 +59,7 @@ export const getNodeCircle = (
   const transColor = addTransparencyToColor(color);
   const img = new Circle({
     fill: new Fill({ color: transColor }),
-    stroke: getDefaultNodeStroke(resolution, transColor),
+    stroke: getDefaultNodeStroke(transColor),
     radius: (3 * NODE_WIDTH) / resolution + 4,
   });
   return img;
@@ -118,11 +118,8 @@ export const getSelectedNodeStroke = (resolution: number): Stroke => {
   return selectedNodeStroke;
 };
 
-export const getDefaultNodeStroke = (
-  resolution: number,
-  color: string,
-): Stroke => {
-  defaultNodeStroke.setWidth(getDefaultStrokeWidth(resolution));
+export const getDefaultNodeStroke = (color: string): Stroke => {
+  defaultNodeStroke.setWidth(getDefaultStrokeWidth());
   defaultNodeStroke.setColor(color);
   return defaultNodeStroke;
 };
@@ -144,6 +141,10 @@ export const createText = (feature: Feature, resolution: number): Text => {
     maxAngle: 0.7853981633974483,
     overflow: false,
     rotation: 0,
+    stroke: new Stroke({
+      color: "#eee",
+      width: 4,
+    }),
   });
   return text;
 };

@@ -9,6 +9,7 @@ describe("create", () => {
       commonName: "qwe",
       lon: 123,
       lat: 456,
+      lineName: "asd",
     };
 
     const feature = createPointFeature(node);
