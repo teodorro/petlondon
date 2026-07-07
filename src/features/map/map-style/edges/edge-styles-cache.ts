@@ -68,7 +68,7 @@ export class EdgeStylesCache {
   };
 
   getEdges() {
-    return this._edgeStyles.keys().toArray();
+    return Array.from(this._edgeStyles.keys());
   }
 }
 
