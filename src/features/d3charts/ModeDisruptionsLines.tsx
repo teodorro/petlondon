@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
 import { useLineStore } from "../../stores/line-store";
-import { createSelectors } from "../../utils/create-selectors";
 import {
   useLineModesQuery,
   useLineDisruptionsQueries,
@@ -34,15 +33,13 @@ export default function ModeDisruptionLines() {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [data, setData] = useState<ModeDisruptionNode | null>(null);
 
-  const selectors = createSelectors(useLineStore);
+  const modes = useLineStore((s) => s.modes);
+  const lines = useLineStore((s) => s.lines);
+  const disruptions = useLineStore((s) => s.disruptions);
 
-  const modes = selectors.use.modes();
-  const lines = selectors.use.lines();
-  const disruptions = selectors.use.disruptions();
-
-  const setModes = selectors.use.setModes();
-  const setLines = selectors.use.setLines();
-  const addDisruption = selectors.use.addDisruption();
+  const setModes = useLineStore((s) => s.setModes);
+  const setLines = useLineStore((s) => s.setLines);
+  const addDisruption = useLineStore((s) => s.addDisruption);
 
   const getLineModes = useLineModesQuery({ enabled: false });
   const getAllValidLinesQuery = useValidLinesQuery();

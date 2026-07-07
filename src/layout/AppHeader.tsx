@@ -4,15 +4,11 @@ import { useDrawerStore } from "../stores/drawer-store";
 import { useThemeStore } from "../stores/theme-store";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
-import { createSelectors } from "../utils/create-selectors";
 
 export default function AppHeader() {
-  const drawerStoreSelectors = createSelectors(useDrawerStore);
-  const toggleDrawer = drawerStoreSelectors.use.toggle();
-
-  const themeStoreSelectors = createSelectors(useThemeStore);
-  const themeMode = themeStoreSelectors.use.mode();
-  const themeToggleMode = themeStoreSelectors.use.toggleMode();
+  const toggleDrawer = useDrawerStore((s) => s.toggle);
+  const themeMode = useThemeStore((s) => s.mode);
+  const themeToggleMode = useThemeStore((s) => s.toggleMode);
 
   return (
     <>

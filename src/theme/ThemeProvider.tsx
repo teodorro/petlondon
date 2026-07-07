@@ -1,40 +1,38 @@
-import React, { useEffect } from 'react';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { getAppTheme } from './index';
-import { useThemeStore } from '../stores/theme-store';
-import { createSelectors } from '../utils/create-selectors';
+import React, { useEffect } from "react";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { getAppTheme } from "./index";
+import { useThemeStore } from "../stores/theme-store";
 
 export const AppThemeProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const themeSelectors = createSelectors(useThemeStore);
-  const mode = themeSelectors.use.mode();
+  const mode = useThemeStore((s) => s.mode);
   const theme = React.useMemo(() => getAppTheme(mode), [mode]);
 
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--theme-primary-color', theme.palette.primary.main);
+    root.style.setProperty("--theme-primary-color", theme.palette.primary.main);
     root.style.setProperty(
-      '--theme-secondary-color',
-      theme.palette.secondary.main
+      "--theme-secondary-color",
+      theme.palette.secondary.main,
     );
     root.style.setProperty(
-      '--theme-background-color',
-      theme.palette.background.default
+      "--theme-background-color",
+      theme.palette.background.default,
     );
     root.style.setProperty(
-      '--theme-background-paper-color',
-      theme.palette.background.paper
+      "--theme-background-paper-color",
+      theme.palette.background.paper,
     );
     root.style.setProperty(
-      '--theme-text-primary-color',
-      theme.palette.text.primary
+      "--theme-text-primary-color",
+      theme.palette.text.primary,
     );
     root.style.setProperty(
-      '--theme-text-secondary-color',
-      theme.palette.text.secondary
+      "--theme-text-secondary-color",
+      theme.palette.text.secondary,
     );
   }, [theme]);
 

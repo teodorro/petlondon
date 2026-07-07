@@ -67,9 +67,9 @@ export const getNodeCircle = (
 
 export const getFont = (resolution: number): string => {
   if (resolution <= NODE_FONT_RESOLUTION_BREAKPOINT) {
-    return `normal ${Math.round(12)}px Arial`;
+    return `bold ${Math.round(12)}px Arial`;
   } else {
-    return `normal ${Math.round(30 / resolution + 5)}px Arial`;
+    return `bold ${Math.round(30 / resolution + 5)}px Arial`;
   }
 };
 

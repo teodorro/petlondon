@@ -1,12 +1,16 @@
-import { create } from 'zustand';
-import { DtoBikePoint } from '../types/dto-bike-point';
+import { create } from "zustand";
+import { DtoBikePoint } from "../types/dto-bike-point";
+import { createSelectors } from "../utils/create-selectors";
 
 interface IBikeStore {
-  bikePoints: DtoBikePoint[],
-  setBikePoints: (points: DtoBikePoint[]) => void,
+  bikePoints: DtoBikePoint[];
+  setBikePoints: (points: DtoBikePoint[]) => void;
 }
 
-export const useBikeStore = create<IBikeStore>((set) => ({
+const useBikeStoreBase = create<IBikeStore>((set) => ({
   bikePoints: [],
-  setBikePoints: (points: DtoBikePoint[]) => set(() => ({ bikePoints: points })),
-}))
+  setBikePoints: (points: DtoBikePoint[]) =>
+    set(() => ({ bikePoints: points })),
+}));
+
+export const useBikeStore = createSelectors(useBikeStoreBase);

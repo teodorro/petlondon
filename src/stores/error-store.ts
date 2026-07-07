@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createSelectors } from "../utils/create-selectors";
 
 interface IErrorStore {
   message: string;
@@ -8,7 +9,7 @@ interface IErrorStore {
   setErrorHappened: (happened: boolean) => void;
 }
 
-const useErrorStore = create<IErrorStore>((set) => ({
+const useErrorStoreBase = create<IErrorStore>((set) => ({
   message: "",
   error: null,
   isErrorHappened: false,
@@ -23,4 +24,4 @@ const useErrorStore = create<IErrorStore>((set) => ({
     })),
 }));
 
-export default useErrorStore;
+export const useErrorStore = createSelectors(useErrorStoreBase);

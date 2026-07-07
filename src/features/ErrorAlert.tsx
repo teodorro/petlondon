@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { Alert, Box } from "@mui/material";
-import { createSelectors } from "../utils/create-selectors";
-import useErrorStore from "../stores/error-store";
+import { useErrorStore } from "../stores/error-store";
 
 export default function ErrorAlert() {
-  const errors = createSelectors(useErrorStore);
+  const errorHappened = useErrorStore((s) => s.isErrorHappened);
+  const message = useErrorStore((s) => s.message);
 
-  const errorHappened = errors.use.isErrorHappened();
-
-  const setErrorHappened = useErrorStore((state) => state.setErrorHappened);
+  const setErrorHappened = useErrorStore((s) => s.setErrorHappened);
 
   useEffect(() => {
     if (errorHappened) {
@@ -32,7 +30,7 @@ export default function ErrorAlert() {
       }}
     >
       <Alert variant="filled" severity="error" sx={{ whiteSpace: "pre-line" }}>
-        {errors.use.message()}
+        {message}
       </Alert>
     </Box>
   );

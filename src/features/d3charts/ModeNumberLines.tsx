@@ -5,7 +5,6 @@ import {
   useLineModesQuery,
 } from "../../services/line-service";
 import { useLineStore } from "../../stores/line-store";
-import { createSelectors } from "../../utils/create-selectors";
 import { Box, CircularProgress } from "@mui/material";
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { makeKebabReadable } from "../../utils/text-utils";
@@ -22,13 +21,11 @@ export default function ModeNumberLines() {
   const xScaleHeight = 30;
   const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
 
-  const selectors = createSelectors(useLineStore);
+  const lines = useLineStore((s) => s.lines);
+  const modes = useLineStore((s) => s.modes);
 
-  const lines = selectors.use.lines();
-  const modes = selectors.use.modes();
-
-  const setLines = selectors.use.setLines();
-  const setModes = selectors.use.setModes();
+  const setLines = useLineStore((s) => s.setLines);
+  const setModes = useLineStore((s) => s.setModes);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
 

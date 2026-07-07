@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
 import { useLineStore } from "../../stores/line-store";
-import { createSelectors } from "../../utils/create-selectors";
 import {
   useLineModesQuery,
   useSeverityCodesQuery,
@@ -27,13 +26,11 @@ export default function ModeSeverityLines() {
   const [radius, setRadius] = useState<number>(0);
   const [data, setData] = useState<ModeSeverityNode | null>(null);
 
-  const lineStoreSelectors = createSelectors(useLineStore);
+  const severityCodes = useLineStore((s) => s.severityCodes);
+  const modes = useLineStore((s) => s.modes);
 
-  const severityCodes = lineStoreSelectors.use.severityCodes();
-  const modes = lineStoreSelectors.use.modes();
-
-  const setSeverityCodes = lineStoreSelectors.use.setSeverityCodes();
-  const setModes = lineStoreSelectors.use.setModes();
+  const setSeverityCodes = useLineStore((s) => s.setSeverityCodes);
+  const setModes = useLineStore((s) => s.setModes);
 
   const getLineModes = useLineModesQuery();
   const getSeverityCodes = useSeverityCodesQuery();

@@ -5,7 +5,6 @@ import { fromLonLat } from "ol/proj";
 import { Layer } from "ol/layer";
 import { useThemeStore } from "../../stores/theme-store";
 import { Box } from "@mui/material";
-import { createSelectors } from "../../utils/create-selectors";
 import { getTileLayer } from "./get-layer/get-tile-layer";
 import {
   useTubeRoutesQueries,
@@ -26,6 +25,7 @@ import {
   InteractionsManager,
 } from "./interactions/interactions-manager";
 import Select, { SelectEvent } from "ol/interaction/Select";
+import { useViewStore } from "../../stores/view-store";
 
 export default function MapComp() {
   const tileLayer = useRef<Layer>(null);
@@ -36,16 +36,19 @@ export default function MapComp() {
     undefined,
   );
 
-  const themeSelectors = createSelectors(useThemeStore);
-  const themeMode = themeSelectors.use.mode();
+  const themeMode = useThemeStore((s) => s.mode);
 
   const selectedFeatureStore = useSelectedFeatureStore();
 
-  const lineSelectors = createSelectors(useLineStore);
-  const lines = lineSelectors.use.lines();
-  const routeSequences = lineSelectors.use.routeSequences();
-  const setLines = lineSelectors.use.setLines();
-  const setRouteSequences = lineSelectors.use.setRouteSequences();
+  const lines = useLineStore((s) => s.lines);
+  const routeSequences = useLineStore((s) => s.routeSequences);
+  const setLines = useLineStore((s) => s.setLines);
+  const setRouteSequences = useLineStore((s) => s.setRouteSequences);
+
+  const center = useViewStore((s) => s.center);
+  const zoom = useViewStore((s) => s.zoom);
+  const setCenter = useViewStore((s) => s.setCenter);
+  const setZoom = useViewStore((s) => s.setZoom);
 
   const getAllValidLinesQuery = useValidLinesQuery();
   const getTubeRoutesQueries = useTubeRoutesQueries(
@@ -106,6 +109,17 @@ export default function MapComp() {
     }
     if (map != null) {
       initInteractions(map, linesLayer.current);
+      map.on("moveend", (evt) => {
+        setCenter(evt.map.getView().getCenter() as [number, number]);
+        setZoom(evt.map.getView().getZoom() as number);
+      });
+
+      if (center != null && center[0] != null && center[1] != null) {
+        map.getView().setCenter(center as [number, number]);
+      }
+      if (zoom != null) {
+        map.getView().setZoom(zoom);
+      }
     }
     return () => {
       map.setTarget(undefined);

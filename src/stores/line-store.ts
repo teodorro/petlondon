@@ -1,9 +1,10 @@
-import { create } from 'zustand';
-import { DtoLine } from '../types/lines/dto-line';
-import { DtoLineMode } from '../types/lines/dto-line-mode';
-import { DtoSeverityCode } from '../types/lines/dto-severity-code';
-import { DtoDisruption } from '../types/lines/dto-disruption';
-import { DtoRouteSequence } from '../types/lines/dto-route-sequence';
+import { create } from "zustand";
+import { DtoLine } from "../types/lines/dto-line";
+import { DtoLineMode } from "../types/lines/dto-line-mode";
+import { DtoSeverityCode } from "../types/lines/dto-severity-code";
+import { DtoDisruption } from "../types/lines/dto-disruption";
+import { DtoRouteSequence } from "../types/lines/dto-route-sequence";
+import { createSelectors } from "../utils/create-selectors";
 
 interface ILineStore {
   lines: DtoLine[];
@@ -19,7 +20,7 @@ interface ILineStore {
   setRouteSequences: (sequences: DtoRouteSequence[]) => void;
 }
 
-export const useLineStore = create<ILineStore>((set) => ({
+const useLineStoreBase = create<ILineStore>((set) => ({
   lines: [],
   modes: [],
   severityCodes: [],
@@ -46,3 +47,5 @@ export const useLineStore = create<ILineStore>((set) => ({
   setRouteSequences: (sequences: DtoRouteSequence[]) =>
     set(() => ({ routeSequences: sequences })),
 }));
+
+export const useLineStore = createSelectors(useLineStoreBase);

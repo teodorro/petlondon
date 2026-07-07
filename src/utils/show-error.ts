@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import useErrorStore from "../stores/error-store";
+import { useErrorStore } from "../stores/error-store";
 
 export const showError = (msg: string, err?: unknown) => {
   console.log(msg, err);
