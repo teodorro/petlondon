@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import {
   useValidLinesQuery,
   useLineModesQuery,
 } from "../../services/line-service";
-import { useLineStore } from "../../stores/line-store";
 import { Box, CircularProgress } from "@mui/material";
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { makeKebabReadable } from "../../utils/text-utils";
@@ -21,12 +20,6 @@ export default function ModeNumberLines() {
   const xScaleHeight = 30;
   const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
 
-  const lines = useLineStore((s) => s.lines);
-  const modes = useLineStore((s) => s.modes);
-
-  const setLines = useLineStore((s) => s.setLines);
-  const setModes = useLineStore((s) => s.setModes);
-
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   const rawData = useRef<Item[]>([]);
@@ -41,18 +34,19 @@ export default function ModeNumberLines() {
   const getLineModesQuery = useLineModesQuery();
   const getAllValidLinesQuery = useValidLinesQuery();
 
+  const modes = useMemo(
+    () => getLineModesQuery.data ?? [],
+    [getLineModesQuery.data],
+  );
+  const lines = useMemo(
+    () => getAllValidLinesQuery.data ?? [],
+    [getAllValidLinesQuery.data],
+  );
+
   const getChartWidth = (): number =>
     Math.max(0, size.width - chartMargin.left - chartMargin.right);
   const getChartHeight = (): number =>
     Math.max(0, size.height - chartMargin.top - chartMargin.bottom);
-
-  useEffect(() => {
-    setModes(getLineModesQuery.data ?? []);
-  }, [getLineModesQuery.data]);
-
-  useEffect(() => {
-    setLines(getAllValidLinesQuery.data ?? []);
-  }, [getAllValidLinesQuery.data]);
 
   useShowQueryError(
     getAllValidLinesQuery,

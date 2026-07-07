@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import "ol/ol.css";
 import { Feature, Map, View } from "ol";
 import { fromLonLat } from "ol/proj";
@@ -10,13 +10,11 @@ import {
   useTubeRoutesQueries,
   useValidLinesQuery,
 } from "../../services/line-service";
-import { useLineStore } from "../../stores/line-store";
 import { TUBE } from "../../types/lines/dto-line";
 import { getLinesLayer } from "./get-layer/get-lines-layer";
-import { DtoRouteSequence } from "../../types/lines/dto-route-sequence";
 import { loadLinesToSchema } from "./load-objects-to-schema/load-lines-to-schema";
 import VectorSource from "ol/source/Vector";
-import { useShowQueriesError, useShowQueryError } from "../../utils/show-error";
+import { useShowQueryError } from "../../utils/show-error";
 import { useSelectedFeatureStore } from "../../stores/selected-feature-store";
 import { Geometry } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
@@ -40,60 +38,30 @@ export default function MapComp() {
 
   const selectedFeatureStore = useSelectedFeatureStore();
 
-  const lines = useLineStore((s) => s.lines);
-  const routeSequences = useLineStore((s) => s.routeSequences);
-  const setLines = useLineStore((s) => s.setLines);
-  const setRouteSequences = useLineStore((s) => s.setRouteSequences);
-
   const center = useViewStore((s) => s.center);
   const zoom = useViewStore((s) => s.zoom);
   const setCenter = useViewStore((s) => s.setCenter);
   const setZoom = useViewStore((s) => s.setZoom);
 
   const getAllValidLinesQuery = useValidLinesQuery();
-  const getTubeRoutesQueries = useTubeRoutesQueries(
-    lines == null || lines.length === 0
-      ? []
-      : lines.filter((line) => line.modeName === TUBE).map((line) => line.id),
-    {
-      enabled: false,
-    },
+  const tubeLineIds = useMemo(
+    () =>
+      (getAllValidLinesQuery.data ?? [])
+        .filter((line) => line.modeName === TUBE)
+        .map((line) => line.id),
+    [getAllValidLinesQuery.data],
   );
+  const tubeRoutesResult = useTubeRoutesQueries(tubeLineIds);
+  const routeSequences = tubeRoutesResult.routeSequences;
 
-  useShowQueriesError(
-    getTubeRoutesQueries,
+  useShowQueryError(
+    tubeRoutesResult,
     (msg) => `Error requesting tube routes\n${msg}`,
   );
   useShowQueryError(
     getAllValidLinesQuery,
     (msg) => `Error requesting all valid lines\n${msg}`,
   );
-
-  useEffect(() => {
-    setLines(getAllValidLinesQuery.data ?? []);
-  }, [getAllValidLinesQuery.data]);
-
-  useEffect(() => {
-    getTubeRoutesQueries.forEach((query) => query.refetch());
-  }, [lines]);
-
-  useEffect(() => {
-    const allDataReady = getTubeRoutesQueries.every((query) => query.data);
-    if (!allDataReady) return;
-
-    const routesSeqs: DtoRouteSequence[] = [];
-    getTubeRoutesQueries.forEach((query) => {
-      if (query.data != null && linesLayer.current != null) {
-        const routeSequence = query.data as DtoRouteSequence;
-        routesSeqs.push(routeSequence);
-      }
-    });
-    setRouteSequences(routesSeqs);
-  }, [
-    getTubeRoutesQueries
-      .map((q) => (q.data as DtoRouteSequence)?.lineId || null)
-      .join("-"),
-  ]);
 
   useEffect(() => {
     loadRouteSequencesToSchema();
@@ -125,10 +93,6 @@ export default function MapComp() {
       map.setTarget(undefined);
     };
   }, [themeMode]);
-
-  useEffect(() => {
-    console.log(selectedFeatureStore.selectedFeature);
-  }, [selectedFeatureStore.selectedFeature]);
 
   const loadRouteSequencesToSchema = () => {
     if (linesLayer.current == null) return;

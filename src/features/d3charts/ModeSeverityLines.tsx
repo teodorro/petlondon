@@ -1,10 +1,9 @@
 /**
  * Turned out too boring chart :/ Mode-Severity parts are differs too little
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
-import { useLineStore } from "../../stores/line-store";
 import {
   useLineModesQuery,
   useSeverityCodesQuery,
@@ -26,26 +25,14 @@ export default function ModeSeverityLines() {
   const [radius, setRadius] = useState<number>(0);
   const [data, setData] = useState<ModeSeverityNode | null>(null);
 
-  const severityCodes = useLineStore((s) => s.severityCodes);
-  const modes = useLineStore((s) => s.modes);
-
-  const setSeverityCodes = useLineStore((s) => s.setSeverityCodes);
-  const setModes = useLineStore((s) => s.setModes);
-
   const getLineModes = useLineModesQuery();
   const getSeverityCodes = useSeverityCodesQuery();
 
-  useEffect(() => {
-    setModes(getLineModes.data ?? []);
-  }, [getLineModes.data]);
-
-  useEffect(() => {
-    setSeverityCodes(getSeverityCodes.data ?? []);
-  }, [getSeverityCodes.data]);
-
-  useEffect(() => {
-    buildHierarchy();
-  }, [modes, severityCodes]);
+  const modes = useMemo(() => getLineModes.data ?? [], [getLineModes.data]);
+  const severityCodes = useMemo(
+    () => getSeverityCodes.data ?? [],
+    [getSeverityCodes.data],
+  );
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {

@@ -7,6 +7,7 @@ import { DtoSeverityCode } from "../types/lines/dto-severity-code";
 import { SafeQueryOptions } from "../types/safe-query-options";
 import { HttpError } from "./http-error";
 import { DtoRouteSequence } from "../types/lines/dto-route-sequence";
+import { DtoDisruption } from "../types/lines/dto-disruption";
 
 export const useValidLinesQuery = (
   serviceType?: ServiceType,
@@ -79,57 +80,64 @@ export const useSeverityCodesQuery = (
   });
 };
 
-export const useLineDisruptionsQueries = (
-  modes: string[],
-  options?: SafeQueryOptions<unknown[]>,
-) => {
-  const queryFn = async ({ queryKey }: any) => {
-    const [, mode] = queryKey as [string, string];
-    const url = `${baseUrl}/Line/Mode/${mode}/Disruption`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      const ra = res.headers.get("retry-after");
-      const retryAfterMs = ra ? Number(ra) * 1000 : undefined;
-      throw new HttpError(res.status, res.statusText, text, retryAfterMs);
-    }
-    const text = await res.text();
-    return text ? JSON.parse(text) : [];
-  };
-
+export const useLineDisruptionsQueries = (modeNames: string[]) => {
   return useQueries({
-    queries: modes.map((mode) => ({
-      queryKey: ["line-disruption", mode],
-      queryFn,
-      ...options,
+    queries: modeNames.map((mode) => ({
+      queryKey: ["line-disruption", mode] as const,
+      queryFn: async (): Promise<DtoDisruption[]> => {
+        const url = `${baseUrl}/Line/Mode/${mode}/Disruption`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          const ra = res.headers.get("retry-after");
+          const retryAfterMs = ra ? Number(ra) * 1000 : undefined;
+          throw new HttpError(res.status, res.statusText, text, retryAfterMs);
+        }
+        const text = await res.text();
+        return text ? (JSON.parse(text) as DtoDisruption[]) : [];
+      },
     })),
+    combine: (results) => ({
+      // null until every mode has loaded, then a mode name -> disruptions map
+      disruptionsByMode: results.every((r) => r.data != null)
+        ? new Map(
+            modeNames.map((mode, i) => [
+              mode,
+              results[i].data as DtoDisruption[],
+            ]),
+          )
+        : null,
+      isError: results.some((r) => r.isError),
+      error: results.find((r) => r.error != null)?.error ?? null,
+    }),
   });
 };
 
-export const useTubeRoutesQueries = (
-  lineIds: string[],
-  options?: SafeQueryOptions<unknown>,
-) => {
-  const queryFn = async ({
-    queryKey,
-  }: any): Promise<DtoRouteSequence | undefined> => {
-    const [, lineId] = queryKey as [string, string];
-    const url = `${baseUrl}/Line/${lineId}/Route/Sequence/inbound`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      const ra = res.headers.get("retry-after");
-      const retryAfterMs = ra ? Number(ra) * 1000 : undefined;
-      throw new HttpError(res.status, res.statusText, text, retryAfterMs);
-    }
-    const text = await res.text();
-    return text ? (JSON.parse(text) as DtoRouteSequence) : undefined;
-  };
+export const useTubeRoutesQueries = (lineIds: string[]) => {
   return useQueries({
     queries: lineIds.map((lineId) => ({
-      queryKey: ["tube-route", lineId],
-      queryFn,
-      ...options,
+      queryKey: ["tube-route", lineId] as const,
+      queryFn: async (): Promise<DtoRouteSequence | null> => {
+        const url = `${baseUrl}/Line/${lineId}/Route/Sequence/inbound`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          const ra = res.headers.get("retry-after");
+          const retryAfterMs = ra ? Number(ra) * 1000 : undefined;
+          throw new HttpError(res.status, res.statusText, text, retryAfterMs);
+        }
+        const text = await res.text();
+        return text ? (JSON.parse(text) as DtoRouteSequence) : null;
+      },
     })),
+    combine: (results) => ({
+      // empty until every route has loaded, so the map draws all lines at once
+      routeSequences:
+        lineIds.length > 0 && results.every((r) => r.data != null)
+          ? results.map((r) => r.data as DtoRouteSequence)
+          : [],
+      isError: results.some((r) => r.isError),
+      error: results.find((r) => r.error != null)?.error ?? null,
+    }),
   });
 };

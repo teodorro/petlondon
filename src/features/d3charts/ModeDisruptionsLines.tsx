@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Box } from "@mui/material";
-import { useLineStore } from "../../stores/line-store";
 import {
   useLineModesQuery,
   useLineDisruptionsQueries,
@@ -9,8 +8,10 @@ import {
 } from "../../services/line-service";
 import { lineColors, LineModeName } from "../../utils/line-colors";
 import { DtoDisruption } from "../../types/lines/dto-disruption";
+import { DtoLine } from "../../types/lines/dto-line";
+import { DtoLineMode } from "../../types/lines/dto-line-mode";
 import { makeKebabReadable } from "../../utils/text-utils";
-import { useShowQueriesError, useShowQueryError } from "../../utils/show-error";
+import { useShowQueryError } from "../../utils/show-error";
 
 interface ModeDisruptionNode {
   name: string;
@@ -28,32 +29,37 @@ export default function ModeDisruptionLines() {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgD3Ref =
     useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
-  const numberOfLines = useRef<ModeCount[]>([]);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [data, setData] = useState<ModeDisruptionNode | null>(null);
 
-  const modes = useLineStore((s) => s.modes);
-  const lines = useLineStore((s) => s.lines);
-  const disruptions = useLineStore((s) => s.disruptions);
-
-  const setModes = useLineStore((s) => s.setModes);
-  const setLines = useLineStore((s) => s.setLines);
-  const addDisruption = useLineStore((s) => s.addDisruption);
-
-  const getLineModes = useLineModesQuery({ enabled: false });
+  const getLineModes = useLineModesQuery();
   const getAllValidLinesQuery = useValidLinesQuery();
-  const getLineDisruptionsQueries = useLineDisruptionsQueries(
-    modes == null || lines == null
-      ? []
-      : modes
-          .filter((mode) =>
-            lines.some((line) => line.modeName === mode.modeName),
-          )
-          .map((mode) => mode.modeName),
-    {
-      enabled: false,
-    },
+
+  const modeNames = useMemo(
+    () =>
+      (getLineModes.data ?? [])
+        .filter((mode) =>
+          (getAllValidLinesQuery.data ?? []).some(
+            (line) => line.modeName === mode.modeName,
+          ),
+        )
+        .map((mode) => mode.modeName),
+    [getLineModes.data, getAllValidLinesQuery.data],
+  );
+  const disruptionsResult = useLineDisruptionsQueries(modeNames);
+
+  const data = useMemo(
+    () =>
+      buildHierarchy(
+        getLineModes.data ?? [],
+        getAllValidLinesQuery.data ?? [],
+        disruptionsResult.disruptionsByMode,
+      ),
+    [
+      getLineModes.data,
+      getAllValidLinesQuery.data,
+      disruptionsResult.disruptionsByMode,
+    ],
   );
 
   const chartMargin = { top: 6, right: 2, bottom: 6, left: 2 };
@@ -62,41 +68,13 @@ export default function ModeDisruptionLines() {
   const getChartHeight = (): number =>
     Math.max(0, size.height - chartMargin.top - chartMargin.bottom);
 
-  useEffect(() => {
-    setModes(getLineModes.data ?? []);
-  }, [getLineModes.data]);
-
-  useEffect(() => {
-    setLines(getAllValidLinesQuery.data ?? []);
-  }, [getAllValidLinesQuery.data]);
-
-  useEffect(() => {
-    calcNumberOfLines();
-    getLineDisruptionsQueries.forEach((query) => query.refetch());
-  }, [modes, lines]);
-
-  useEffect(() => {
-    const allDataReady = getLineDisruptionsQueries.every((query) => query.data);
-
-    if (!allDataReady) return;
-
-    getLineDisruptionsQueries.forEach((query, index) => {
-      const disruptionData = query.data;
-      const mode = modes[index];
-      if (disruptionData) {
-        addDisruption(mode.modeName, disruptionData as DtoDisruption[]);
-      }
-    });
-  }, [
-    // to make it run after receiving all disruptions
-    getLineDisruptionsQueries
-      .map((q) => ((q.data as DtoDisruption[]) || null)?.length)
-      .join("-"),
-  ]);
-
-  useShowQueriesError(
-    getLineDisruptionsQueries,
+  useShowQueryError(
+    disruptionsResult,
     (msg) => `Error requesting line disruptions\n${msg}`,
+  );
+  useShowQueryError(
+    getLineModes,
+    (msg) => `Error requesting line modes\n${msg}`,
   );
   useShowQueryError(
     getAllValidLinesQuery,
@@ -127,10 +105,6 @@ export default function ModeDisruptionLines() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    setData(buildHierarchy());
-  }, [modes, disruptions, lines]);
 
   useEffect(() => {
     if (!size.width || !size.height || !data) return;
@@ -417,79 +391,6 @@ export default function ModeDisruptionLines() {
         ),
     );
 
-  const calcNumberOfLines = () => {
-    if (modes == null || lines == null) return;
-    numberOfLines.current = [];
-    modes.forEach((mode) => {
-      const num = lines.filter(
-        (line) => line.modeName === mode.modeName,
-      ).length;
-      numberOfLines.current.push({ mode: mode.modeName, count: num });
-    });
-  };
-
-  const buildHierarchy = (): ModeDisruptionNode => {
-    const root: ModeDisruptionNode = {
-      name: "root",
-      children: [],
-    };
-    if (modes == null || disruptions == null || lines == null) return root;
-
-    /**
-     * 1st level - modes with lines, log scale
-     * 2nd level - categories in these modes
-     * 3nd level - disruptions if there's not a single one (not made yet. Not needed?)
-     */
-    const logNumberOfLines = numberOfLines.current
-      .filter((item) => item.count > 0)
-      .map((x) => ({
-        name: x.mode,
-        count: Math.log(x.count) + 1,
-      }));
-    const sumLogs = logNumberOfLines.reduce((ac, cv) => ac + cv.count, 0);
-    const partLogNumberOfLines = logNumberOfLines.map((item) => ({
-      name: item.name,
-      count: item.count / sumLogs,
-    }));
-
-    partLogNumberOfLines.forEach((item) => {
-      const itemDisruptions = disruptions.get(item.name);
-      const currentNode: ModeDisruptionNode = {
-        name: item.name,
-        info: `${
-          numberOfLines.current.find((x) => x.mode === item.name)?.count
-        } lines`,
-        children: [],
-        value:
-          itemDisruptions == null || itemDisruptions.length === 0
-            ? item.count
-            : undefined,
-      };
-      if (itemDisruptions != null && itemDisruptions.length !== 0) {
-        const uniqueCategories = [
-          ...new Set(itemDisruptions.map((d) => d.category)),
-        ];
-        uniqueCategories.forEach((category) => {
-          const categoryDisruptions = itemDisruptions.filter(
-            (d) => d.category === category,
-          );
-          const childNode: ModeDisruptionNode = {
-            name: category,
-            info: `${categoryDisruptions.length} disruptions`,
-            children: [],
-            value:
-              item.count *
-              (categoryDisruptions.length / itemDisruptions.length),
-          };
-          currentNode.children?.push(childNode);
-        });
-      }
-      root.children?.push(currentNode);
-    });
-
-    return root;
-  };
-
   return (
     <Box>
       <Box
@@ -514,3 +415,70 @@ export default function ModeDisruptionLines() {
     </Box>
   );
 }
+
+/**
+ * 1st level - modes with lines, log scale
+ * 2nd level - categories in these modes
+ * 3nd level - disruptions if there's not a single one (not made yet. Not needed?)
+ */
+const buildHierarchy = (
+  modes: DtoLineMode[],
+  lines: DtoLine[],
+  disruptionsByMode: Map<string, DtoDisruption[]> | null,
+): ModeDisruptionNode => {
+  const root: ModeDisruptionNode = {
+    name: "root",
+    children: [],
+  };
+
+  const numberOfLines: ModeCount[] = modes.map((mode) => ({
+    mode: mode.modeName,
+    count: lines.filter((line) => line.modeName === mode.modeName).length,
+  }));
+
+  const logNumberOfLines = numberOfLines
+    .filter((item) => item.count > 0)
+    .map((x) => ({
+      name: x.mode,
+      count: Math.log(x.count) + 1,
+    }));
+  const sumLogs = logNumberOfLines.reduce((ac, cv) => ac + cv.count, 0);
+  const partLogNumberOfLines = logNumberOfLines.map((item) => ({
+    name: item.name,
+    count: item.count / sumLogs,
+  }));
+
+  partLogNumberOfLines.forEach((item) => {
+    const itemDisruptions = disruptionsByMode?.get(item.name);
+    const currentNode: ModeDisruptionNode = {
+      name: item.name,
+      info: `${numberOfLines.find((x) => x.mode === item.name)?.count} lines`,
+      children: [],
+      value:
+        itemDisruptions == null || itemDisruptions.length === 0
+          ? item.count
+          : undefined,
+    };
+    if (itemDisruptions != null && itemDisruptions.length !== 0) {
+      const uniqueCategories = [
+        ...new Set(itemDisruptions.map((d) => d.category)),
+      ];
+      uniqueCategories.forEach((category) => {
+        const categoryDisruptions = itemDisruptions.filter(
+          (d) => d.category === category,
+        );
+        const childNode: ModeDisruptionNode = {
+          name: category,
+          info: `${categoryDisruptions.length} disruptions`,
+          children: [],
+          value:
+            item.count * (categoryDisruptions.length / itemDisruptions.length),
+        };
+        currentNode.children?.push(childNode);
+      });
+    }
+    root.children?.push(currentNode);
+  });
+
+  return root;
+};
