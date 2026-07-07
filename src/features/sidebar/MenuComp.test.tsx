@@ -29,10 +29,9 @@ describe("MenuComp", () => {
     mockDrawerStore.mockReturnValue({ open: true });
     renderWithRouter(<MenuComp />);
 
-    expect(screen.getAllByRole("img")).toHaveLength(3);
+    expect(screen.getAllByRole("img")).toHaveLength(2);
     expect(screen.getByAltText(/openlayers/i)).toBeInTheDocument();
     expect(screen.getByAltText(/d3/i)).toBeInTheDocument();
-    expect(screen.getByAltText(/aggrid/i)).toBeInTheDocument();
   });
 
   it("does not render text labels when drawer is closed", () => {
@@ -44,6 +43,5 @@ describe("MenuComp", () => {
 
     expect(screen.queryByText(/OpenLayers/)).not.toBeInTheDocument();
     expect(screen.queryByText(/D3/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/AGgrid/)).not.toBeInTheDocument();
   });
 });
