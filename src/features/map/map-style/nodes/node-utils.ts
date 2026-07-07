@@ -78,11 +78,7 @@ export const getIconScale = (resolution: number): number => {
 };
 
 export const getTextOffsetY = (resolution: number): number => {
-  if (resolution <= NODE_RESOLUTION_BREAKPOINT) {
-    return NODE_WIDTH + 10;
-  } else {
-    return NODE_WIDTH / resolution + 20 / resolution; // in fact doesn't matter
-  }
+  return (NODE_WIDTH + 10) / Math.log10(resolution + 1);
 };
 
 export const getSelectedStrokeWidth = (resolution: number): number => {

@@ -196,7 +196,6 @@ export default function SequencySunburst() {
     const text = await response.text();
     csv.current = d3.csvParseRows(text);
     setData(buildHierarchy(csv.current));
-    console.log(data);
   };
 
   const buildHierarchy = (csvData: string[][]) => {

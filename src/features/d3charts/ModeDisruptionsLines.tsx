@@ -310,7 +310,6 @@ export default function ModeDisruptionLines() {
       d3.max(root.descendants(), (d) => d.y1) ??
       fallbackRadius * fallbackRadius;
     const realRadius = Math.sqrt(maxY1);
-    console.log(realRadius, "realRadius");
 
     const arc = d3
       .arc<d3.HierarchyRectangularNode<ModeDisruptionNode>>()

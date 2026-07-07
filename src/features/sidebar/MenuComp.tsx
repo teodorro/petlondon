@@ -12,7 +12,6 @@ export default function MenuComp() {
     { id: 1, name: MenuItemNames.Test },
     { id: 2, name: MenuItemNames.OpenLayers },
     { id: 3, name: MenuItemNames.D3 },
-    { id: 4, name: MenuItemNames.AGgrid },
   ];
 
   const getNavItem = (name: string): ReactElement => {
@@ -21,8 +20,6 @@ export default function MenuComp() {
         return getOpenLayersNavItem();
       case MenuItemNames.D3:
         return getD3NavItem();
-      case MenuItemNames.AGgrid:
-        return getAgGridNavItem();
       case MenuItemNames.Test:
         return getTestItem();
       default:
@@ -40,10 +37,6 @@ export default function MenuComp() {
 
   const getD3NavItem = () => {
     return getDefaultNavItem(MenuItemNames.D3, "d3js.svg", "/d3");
-  };
-
-  const getAgGridNavItem = () => {
-    return getDefaultNavItem(MenuItemNames.AGgrid, "ag-grid.png", "/aggrid");
   };
 
   const getUnknownNavItem = () => {
