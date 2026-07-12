@@ -1,0 +1,112 @@
+[
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/emr-weather-20260706/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/broxbourne-20260410/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/overton-20260327/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/gloucester-20260305/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/gloucester-20260305/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/gloucester-20260305/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/colne-20260710/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/leeds-20260711/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/leeds-20260711/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  },
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "Information",
+    "type": "specialService",
+    "categoryDescription": "Information",
+    "description": "https://www.nationalrail.co.uk/service-disruptions/stratford-20260710/",
+    "additionalInfo": "Custom",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "specialService"
+  }
+]

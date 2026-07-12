@@ -1,0 +1,12 @@
+[
+  {
+    "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+    "category": "RealTime",
+    "type": "lineInfo",
+    "categoryDescription": "RealTime",
+    "description": "All day on Sunday, 12 July, service will operate at a reduced frequency between Whitechapel and Shenfield while we undertake repairs following a line side fire at Stratford on Friday. GOOD SERVICE on the rest of the line. ",
+    "affectedRoutes": [],
+    "affectedStops": [],
+    "closureText": "goodService"
+  }
+]
