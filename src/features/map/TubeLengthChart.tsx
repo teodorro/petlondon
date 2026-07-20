@@ -60,8 +60,10 @@ export default function TubeLengthChart({ line }: Props) {
         top: 30,
       },
       backgroundColor: "transparent",
+
       xAxis: {
         type: "category",
+        name: "Section number",
         data: Array.from(
           { length: line.getProperties().stopPoints.length - 1 },
           (_, i) => i + 1,
@@ -69,6 +71,7 @@ export default function TubeLengthChart({ line }: Props) {
       },
       yAxis: {
         type: "value",
+        name: "Distance (km)",
       },
       series: [
         {
@@ -76,12 +79,14 @@ export default function TubeLengthChart({ line }: Props) {
           data: directDistances,
           type: "line",
           color: "red",
+          showSymbol: false,
         },
         {
           name: "Smoothed",
           data: smoothDistances,
           type: "line",
           color: "blue",
+          showSymbol: false,
         },
       ],
       grid: {
