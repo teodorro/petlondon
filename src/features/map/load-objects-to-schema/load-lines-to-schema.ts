@@ -49,5 +49,6 @@ const addLine = (
     lineName,
     stopPoints.map((sp) => [sp.lon, sp.lat] as [number, number]),
   );
+  feature.setProperties({ stopPoints: stopPoints });
   if (feature != null) layerSource.addFeature(feature);
 };
