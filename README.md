@@ -6,7 +6,7 @@ Interactive map of London's tube lines and charts about London's transport netwo
 
 ![Tube map light](docs/screenshot-map.png)
 ![Tube map dark](docs/screenshot-map-2.png)
-![Charts 1](docs/screenshot-chart.png)
+![Charts 1](docs/screenshot-chart-1.png)
 ![Charts 2](docs/screenshot-chart-2.png)
 ![Charts 3](docs/screenshot-chart-3.png)
 
